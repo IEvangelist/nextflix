@@ -1,0 +1,186 @@
+'use client'
+
+import { useState } from 'react'
+import { Movie, MovieVideo, searchMovies } from '@/lib/tmdb'
+import HeroSection from './HeroSection'
+import MovieRow from './MovieRow'
+import Header from './Header'
+
+interface NetflixClientProps {
+  trendingMovies: Movie[]
+  popularMovies: Movie[]
+  topRatedMovies: Movie[]
+  nowPlayingMovies: Movie[]
+  upcomingMovies: Movie[]
+  heroMovie: Movie | null
+  heroVideos: MovieVideo[]
+}
+
+export default function NetflixClient({
+  trendingMovies,
+  popularMovies,
+  topRatedMovies,
+  nowPlayingMovies,
+  upcomingMovies,
+  heroMovie,
+  heroVideos
+}: NetflixClientProps) {
+  const [searchResults, setSearchResults] = useState<Movie[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      setShowSearch(false)
+      return
+    }
+
+    setIsSearching(true)
+    setShowSearch(true)
+    try {
+      const results = await searchMovies(query)
+      setSearchResults(results)
+    } catch (error) {
+      console.error('Search failed:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  const handleMoviePlay = (movie: Movie) => {
+    console.log('Playing movie:', movie.title)
+    // Here you could implement:
+    // - Open a modal with movie details
+    // - Navigate to a movie detail page
+    // - Start video playback
+    // - Add to watchlist, etc.
+  }
+
+  const clearSearch = () => {
+    setSearchResults([])
+    setShowSearch(false)
+  }
+
+  return (
+    <>
+      {/* Header */}
+      <Header onSearch={handleSearch} />
+
+      {/* Search Results Overlay */}
+      {showSearch && (
+        <div className="fixed inset-0 bg-black/95 z-40 pt-20">
+          <div className="container mx-auto px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-white">
+                {isSearching ? 'Searching...' : `Search Results (${searchResults.length})`}
+              </h2>
+              <button
+                onClick={clearSearch}
+                className="text-white hover:text-gray-300 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {isSearching ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : searchResults.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {searchResults.map((movie) => (
+                  <div key={movie.id} className="w-full">
+                    <MovieCard movie={movie} onPlay={handleMoviePlay} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-white/60 text-lg">No results found</p>
+                <p className="text-white/40 text-sm mt-2">Try searching with different keywords</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className={showSearch ? 'blur-sm pointer-events-none' : ''}>
+        {/* Hero Section */}
+        {heroMovie && !showSearch && (
+          <HeroSection movie={heroMovie} videos={heroVideos} />
+        )}
+
+        {/* Movie Rows */}
+        {!showSearch && (
+          <div className="relative z-10 -mt-32 space-y-8 pb-16">
+            {trendingMovies.length > 0 && (
+              <MovieRow 
+                title="Trending Now" 
+                movies={trendingMovies} 
+                onMoviePlay={handleMoviePlay}
+              />
+            )}
+            
+            {popularMovies.length > 0 && (
+              <MovieRow 
+                title="Popular on Netflix" 
+                movies={popularMovies} 
+                onMoviePlay={handleMoviePlay}
+              />
+            )}
+            
+            {topRatedMovies.length > 0 && (
+              <MovieRow 
+                title="Top Rated" 
+                movies={topRatedMovies} 
+                onMoviePlay={handleMoviePlay}
+              />
+            )}
+            
+            {nowPlayingMovies.length > 0 && (
+              <MovieRow 
+                title="Now Playing" 
+                movies={nowPlayingMovies} 
+                onMoviePlay={handleMoviePlay}
+              />
+            )}
+            
+            {upcomingMovies.length > 0 && (
+              <MovieRow 
+                title="Coming Soon" 
+                movies={upcomingMovies} 
+                onMoviePlay={handleMoviePlay}
+              />
+            )}
+
+            {/* No Data Fallback */}
+            {trendingMovies.length === 0 && popularMovies.length === 0 && (
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-white mb-4">
+                    Unable to load content
+                  </h2>
+                  <p className="text-white/60 mb-8">
+                    Please check your internet connection and TMDB API configuration.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+// Import MovieCard locally to avoid circular imports
+import MovieCard from './MovieCard'

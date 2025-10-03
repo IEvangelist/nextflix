@@ -1,0 +1,17 @@
+<svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="750" fill="#1a1a1a"/>
+  <rect x="50" y="50" width="400" height="650" fill="#2a2a2a" stroke="#404040" stroke-width="2"/>
+  
+  <!-- Film icon -->
+  <rect x="200" y="300" width="100" height="150" fill="#404040" rx="8"/>
+  <circle cx="225" cy="325" r="8" fill="#606060"/>
+  <circle cx="275" cy="325" r="8" fill="#606060"/>
+  <rect x="210" y="345" width="80" height="4" fill="#606060" rx="2"/>
+  <rect x="210" y="355" width="60" height="4" fill="#606060" rx="2"/>
+  <rect x="210" y="365" width="70" height="4" fill="#606060" rx="2"/>
+  
+  <!-- Movie text -->
+  <text x="250" y="500" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#606060" text-anchor="middle">Movie</text>
+  <text x="250" y="530" font-family="Arial, sans-serif" font-size="16" fill="#505050" text-anchor="middle">Poster</text>
+  <text x="250" y="550" font-family="Arial, sans-serif" font-size="16" fill="#505050" text-anchor="middle">Not Available</text>
+</svg>
