@@ -1,0 +1,276 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import { X, Play, Pause, Plus, ThumbsUp, ThumbsDown, Volume2, VolumeX, RotateCcw } from 'lucide-react'
+import { Movie, MovieVideo, getImageUrl, getAgeRating, getYear, getMovieDetails, getMovieVideos } from '@/lib/tmdb'
+import type { MovieDetails as TMDBMovieDetails } from '@/lib/tmdb'
+
+interface MovieDetailsProps {
+  movie: Movie
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsProps) {
+  const [movieDetails, setMovieDetails] = useState<TMDBMovieDetails | null>(null)
+  const [videos, setVideos] = useState<MovieVideo[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isMuted, setIsMuted] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(true)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => {
+    if (isOpen && movie.id) {
+      setIsLoading(true)
+      Promise.all([
+        getMovieDetails(movie.id),
+        getMovieVideos(movie.id)
+      ]).then(([details, videoResults]) => {
+        if (details) setMovieDetails(details)
+        setVideos(videoResults)
+        setIsLoading(false)
+      }).catch(() => {
+        setIsLoading(false)
+      })
+    }
+  }, [isOpen, movie.id])
+
+  const trailer = videos.find(video => video.type === 'Trailer' && video.site === 'YouTube')
+  
+  // Create stable trailer URL (always starts muted to prevent hydration mismatch)
+  const baseTrailerUrl = trailer 
+    ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1`
+    : null
+
+  // YouTube Player API integration for mute control
+  useEffect(() => {
+    if (trailer && typeof window !== 'undefined') {
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== 'https://www.youtube.com') return
+        // Handle YouTube player ready state if needed
+      }
+
+      window.addEventListener('message', handleMessage)
+      return () => window.removeEventListener('message', handleMessage)
+    }
+  }, [trailer])
+
+  const handlePlay = () => {
+    if (iframeRef.current && baseTrailerUrl) {
+      try {
+        // Use postMessage API to control YouTube player
+        const command = isPlaying ? 'pauseVideo' : 'playVideo'
+        iframeRef.current.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*')
+        setIsPlaying(!isPlaying)
+      } catch (error) {
+        console.log('Player control failed, using fallback:', error)
+        // Fallback: Toggle autoplay parameter
+        const currentSrc = iframeRef.current.src
+        if (isPlaying) {
+          iframeRef.current.src = currentSrc.replace('autoplay=1', 'autoplay=0')
+        } else {
+          iframeRef.current.src = currentSrc.replace('autoplay=0', 'autoplay=1')
+        }
+        setIsPlaying(!isPlaying)
+      }
+    }
+  }
+
+  const handleMute = () => {
+    if (iframeRef.current && baseTrailerUrl) {
+      try {
+        // Use postMessage API to control YouTube player volume
+        const command = isMuted ? 'unMute' : 'mute'
+        iframeRef.current.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*')
+        setIsMuted(!isMuted)
+      } catch (error) {
+        console.log('Mute control failed, using fallback:', error)
+        // Fallback: Toggle mute parameter by reloading iframe
+        const currentSrc = iframeRef.current.src
+        if (isMuted) {
+          iframeRef.current.src = currentSrc.replace('mute=1', 'mute=0')
+        } else {
+          iframeRef.current.src = currentSrc.replace('mute=0', 'mute=1')
+        }
+        setIsMuted(!isMuted)
+      }
+    }
+  }
+
+  const handleReset = () => {
+    if (iframeRef.current && baseTrailerUrl) {
+      const currentSrc = iframeRef.current.src
+      iframeRef.current.src = ''
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = currentSrc
+          setIsPlaying(true)
+        }
+      }, 100)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4">
+      <div className="bg-zinc-900 rounded-xl max-w-6xl w-full max-h-[95vh] overflow-y-auto relative mx-4 md:mx-8">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 z-30 w-12 h-12 bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black border-2 border-white/30 hover:border-white/50 transition-all duration-200 shadow-lg"
+        >
+          <X className="w-7 h-7" />
+        </button>
+
+        {/* Video/Image Section */}
+        <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
+          {baseTrailerUrl ? (
+            <>
+              <iframe
+                ref={iframeRef}
+                src={baseTrailerUrl}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen={false}
+                title={`${movie.title} Trailer`}
+              />
+              
+              {/* Video Controls */}
+                <div className="absolute bottom-6 right-6 flex items-center gap-3 z-20">
+                {/* Play/Pause Button */}
+                <button
+                  onClick={handlePlay}
+                  className="w-14 h-14 bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110"
+                  title={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <Pause className="w-7 h-7" fill="white" /> : <Play className="w-7 h-7" fill="white" />}
+                </button>
+
+                {/* Mute/Unmute Button */}
+                <button
+                  onClick={handleMute}
+                  className="w-14 h-14 bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110"
+                  title={isMuted ? 'Unmute' : 'Mute'}
+                >
+                  {isMuted ? <VolumeX className="w-7 h-7" /> : <Volume2 className="w-7 h-7" />}
+                </button>
+
+                {/* Reset Button */}
+                <button
+                  onClick={handleReset}
+                  className="w-14 h-14 bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110"
+                  title="Restart"
+                >
+                  <RotateCcw className="w-7 h-7" />
+                </button>
+              </div>
+            </>
+          ) : (
+            <Image
+              src={getImageUrl(movie.backdrop_path || movie.poster_path, 'original')}
+              alt={movie.title}
+              fill
+              className="object-cover"
+            />
+          )}
+
+          {/* Gradient Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
+        </div>
+
+        {/* Content Section */}
+          <div 
+            className="p-4 md:p-8" 
+            style={{ 
+              padding: 'clamp(1rem, 3vw, 2rem)', 
+              paddingTop: '0',
+              paddingBottom: 'clamp(1rem, 2vw, 1.5rem)'
+            }}
+          >
+          {/* Title and Meta */}
+            <div className="mb-6" style={{ marginBottom: 'clamp(1rem, 2vw, 1.25rem)' }}>
+            <h1 
+                className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight"
+                style={{ marginBottom: 'clamp(0.75rem, 2vw, 1rem)' }}
+            >
+              {movie.title}
+            </h1>
+            
+            <div 
+                className="flex items-center gap-2 md:gap-4 text-sm md:text-base text-white/80 mb-4 flex-wrap"
+                style={{ marginBottom: 'clamp(0.75rem, 2vw, 1rem)', gap: 'clamp(0.5rem, 1vw, 1rem)' }}
+            >
+              <span className="bg-red-600 px-3 md:px-4 py-1 md:py-2 rounded font-bold text-sm">
+                {getAgeRating(movie.adult)}
+              </span>
+              <span>{getYear(movie.release_date)}</span>
+              {movieDetails?.runtime && (
+                <span>{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
+              )}
+              <div className="flex items-center gap-1">
+                <span className="text-yellow-400">★</span>
+                <span>{movie.vote_average.toFixed(1)}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div 
+                className="flex items-center gap-3 md:gap-4 mb-6"
+                style={{ marginBottom: 'clamp(1rem, 2vw, 1.25rem)', gap: 'clamp(0.75rem, 2vw, 1rem)' }}
+            >
+              <button className="w-12 h-12 md:w-14 md:h-14 border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:border-white/60 hover:bg-white/10 transition-all duration-200">
+                <Plus className="w-6 h-6 md:w-7 md:h-7" />
+              </button>
+              <button className="w-12 h-12 md:w-14 md:h-14 border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:border-white/60 hover:bg-white/10 transition-all duration-200">
+                <ThumbsUp className="w-6 h-6 md:w-7 md:h-7" />
+              </button>
+              <button className="w-12 h-12 md:w-14 md:h-14 border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:border-white/60 hover:bg-white/10 transition-all duration-200">
+                <ThumbsDown className="w-6 h-6 md:w-7 md:h-7" />
+              </button>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div 
+              className="grid md:grid-cols-3 gap-6 md:gap-8"
+              style={{ gap: 'clamp(1rem, 3vw, 2rem)' }}
+          >
+            <div className="md:col-span-2">
+              <p className="text-white/90 text-lg md:text-xl leading-relaxed mb-8">
+                {movie.overview}
+              </p>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-4 md:space-y-5 text-base">
+              {movieDetails?.genres && (
+                <div>
+                  <span className="text-white/60">Genres: </span>
+                  <span className="text-white">
+                    {movieDetails.genres.map(genre => genre.name).join(', ')}
+                  </span>
+                </div>
+              )}
+              
+              <div>
+                <span className="text-white/60">Release Date: </span>
+                <span className="text-white">{new Date(movie.release_date).toLocaleDateString()}</span>
+              </div>
+
+              {movieDetails?.production_companies && movieDetails.production_companies.length > 0 && (
+                <div>
+                  <span className="text-white/60">Production: </span>
+                  <span className="text-white">
+                    {movieDetails.production_companies.slice(0, 3).map(company => company.name).join(', ')}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

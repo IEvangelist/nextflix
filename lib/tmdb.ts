@@ -104,7 +104,7 @@ export function getTrailerUrl(videos: MovieVideo[]): string | null {
   const trailer = videos.find(
     (video) => video.type === 'Trailer' && video.site === 'YouTube'
   );
-  return trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1` : null;
+  return trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1` : null;
 }
 
 export function getAgeRating(adult: boolean): string {

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Movie, MovieVideo, searchMovies } from '@/lib/tmdb'
 import HeroSection from './HeroSection'
 import MovieRow from './MovieRow'
 import Header from './Header'
+import MovieDetails from './MovieDetails'
 
 interface NetflixClientProps {
   trendingMovies: Movie[]
@@ -28,6 +29,9 @@ export default function NetflixClient({
   const [searchResults, setSearchResults] = useState<Movie[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
+  const [showMovieDetails, setShowMovieDetails] = useState(false)
+  const heroRef = useRef<{ pauseVideo: () => void; resumeVideo: () => void }>(null)
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -56,6 +60,24 @@ export default function NetflixClient({
     // - Navigate to a movie detail page
     // - Start video playback
     // - Add to watchlist, etc.
+  }
+
+  const handleMovieClick = (movie: Movie) => {
+    // Pause hero video when modal opens
+    if (heroRef.current?.pauseVideo) {
+      heroRef.current.pauseVideo()
+    }
+    setSelectedMovie(movie)
+    setShowMovieDetails(true)
+  }
+
+  const closeMovieDetails = () => {
+    // Resume hero video when modal closes
+    if (heroRef.current?.resumeVideo) {
+      heroRef.current.resumeVideo()
+    }
+    setShowMovieDetails(false)
+    setSelectedMovie(null)
   }
 
   const clearSearch = () => {
@@ -92,7 +114,7 @@ export default function NetflixClient({
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {searchResults.map((movie) => (
                   <div key={movie.id} className="w-full">
-                    <MovieCard movie={movie} onPlay={handleMoviePlay} />
+                    <MovieCard movie={movie} onPlay={handleMoviePlay} onClick={handleMovieClick} />
                   </div>
                 ))}
               </div>
@@ -110,7 +132,7 @@ export default function NetflixClient({
       <div className={showSearch ? 'blur-sm pointer-events-none' : ''}>
         {/* Hero Section */}
         {heroMovie && !showSearch && (
-          <HeroSection movie={heroMovie} videos={heroVideos} />
+          <HeroSection ref={heroRef} movie={heroMovie} videos={heroVideos} />
         )}
 
         {/* Movie Rows */}
@@ -121,6 +143,7 @@ export default function NetflixClient({
                 title="Trending Now" 
                 movies={trendingMovies} 
                 onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
               />
             )}
             
@@ -129,6 +152,7 @@ export default function NetflixClient({
                 title="Popular on Netflix" 
                 movies={popularMovies} 
                 onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
               />
             )}
             
@@ -137,6 +161,7 @@ export default function NetflixClient({
                 title="Top Rated" 
                 movies={topRatedMovies} 
                 onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
               />
             )}
             
@@ -145,6 +170,7 @@ export default function NetflixClient({
                 title="Now Playing" 
                 movies={nowPlayingMovies} 
                 onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
               />
             )}
             
@@ -153,6 +179,7 @@ export default function NetflixClient({
                 title="Coming Soon" 
                 movies={upcomingMovies} 
                 onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
               />
             )}
 
@@ -178,6 +205,15 @@ export default function NetflixClient({
           </div>
         )}
       </div>
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetails
+          movie={selectedMovie}
+          isOpen={showMovieDetails}
+          onClose={closeMovieDetails}
+        />
+      )}
     </>
   )
 }

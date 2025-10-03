@@ -34,33 +34,39 @@ export default function Header({ onSearch }: HeaderProps) {
         isScrolled ? 'bg-black/95 backdrop-blur-md' : 'bg-transparent'
       }`}
     >
-      <div className="flex items-center justify-between px-6 lg:px-8 py-5">
+      <div 
+        className="flex items-center justify-between py-6" 
+        style={{ 
+          paddingLeft: 'clamp(1.5rem, 4vw, 3rem)', 
+          paddingRight: 'clamp(1.5rem, 4vw, 3rem)' 
+        }}
+      >
         {/* Logo */}
-        <div className="flex items-center space-x-10">
+        <div className="flex items-center" style={{ gap: 'clamp(2rem, 5vw, 4rem)' }}>
           <h1 className="text-red-600 text-3xl font-bold tracking-tight">NEXTFLIX</h1>
           
           {/* Navigation Menu */}
-          <nav className="hidden md:flex space-x-6">
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+          <nav className="hidden md:flex" style={{ gap: '2rem' }}>
+            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Home
             </a>
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               TV Shows
             </a>
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Movies
             </a>
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               New & Popular
             </a>
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               My List
             </a>
           </nav>
         </div>
 
         {/* Right Side Controls */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center" style={{ gap: '2rem' }}>
           {/* Search */}
           <div className="relative">
             {isSearchOpen ? (
@@ -84,7 +90,7 @@ export default function Header({ onSearch }: HeaderProps) {
                     setIsSearchOpen(false)
                     setSearchQuery('')
                   }}
-                  className="ml-3 text-white hover:text-gray-300 p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  className="cursor-pointer ml-3 text-white hover:text-gray-300 p-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -94,7 +100,7 @@ export default function Header({ onSearch }: HeaderProps) {
             ) : (
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg"
+                className="cursor-pointer text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg"
                 aria-label="Open search"
               >
                 <Search className="w-6 h-6" />
@@ -104,7 +110,7 @@ export default function Header({ onSearch }: HeaderProps) {
 
           {/* Notifications */}
           <button 
-            className="text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg relative"
+            className="cursor-pointer text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg relative"
             aria-label="Notifications"
           >
             <Bell className="w-6 h-6" />
@@ -114,7 +120,7 @@ export default function Header({ onSearch }: HeaderProps) {
 
           {/* User Profile */}
           <button 
-            className="text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg"
+            className="cursor-pointer text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg"
             aria-label="User profile"
           >
             <User className="w-6 h-6" />
