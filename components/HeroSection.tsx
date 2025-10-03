@@ -64,7 +64,7 @@ const HeroSection = forwardRef<
         if (data.event === 'video-progress') {
           // Handle video progress updates
         }
-      } catch (error) {
+      } catch {
         // Ignore parsing errors
       }
     }

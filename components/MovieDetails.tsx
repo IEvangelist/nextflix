@@ -15,23 +15,20 @@ interface MovieDetailsProps {
 export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsProps) {
   const [movieDetails, setMovieDetails] = useState<TMDBMovieDetails | null>(null)
   const [videos, setVideos] = useState<MovieVideo[]>([])
-  const [isLoading, setIsLoading] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [isPlaying, setIsPlaying] = useState(true)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     if (isOpen && movie.id) {
-      setIsLoading(true)
       Promise.all([
         getMovieDetails(movie.id),
         getMovieVideos(movie.id)
       ]).then(([details, videoResults]) => {
         if (details) setMovieDetails(details)
         setVideos(videoResults)
-        setIsLoading(false)
       }).catch(() => {
-        setIsLoading(false)
+        // Handle error silently
       })
     }
   }, [isOpen, movie.id])
