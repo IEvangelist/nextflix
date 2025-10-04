@@ -6,7 +6,8 @@ import type {
 } from 'tmdb-ts';
 
 // TMDB API Configuration
-const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY 
+  ?? process.env.TheMovie_DB_ApiKey;
 
 // Initialize TMDB client
 const tmdb = new TMDB(API_KEY || '');

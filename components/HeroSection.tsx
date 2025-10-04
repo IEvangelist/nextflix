@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 import Image from 'next/image'
-import { Play, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react'
+import { Play } from 'lucide-react'
 import { Movie, MovieVideo, getImageUrl, getAgeRating, getYear, getTrailerUrl } from '@/lib/tmdb'
+import { useMouseIdle } from '@/lib/hooks'
+import VideoControls from './VideoControls'
 
 interface HeroSectionProps {
   movie: Movie
@@ -17,9 +19,14 @@ const HeroSection = forwardRef<
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
   const [showImage, setShowImage] = useState(true)
+  const [videoEnded, setVideoEnded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
 
+  // Mouse idle detection - only when trailer is playing
   const trailerUrl = getTrailerUrl(videos)
+  const isMouseIdle = useMouseIdle(3000) // 3 seconds idle time
+  const shouldFadeOverlay = trailerUrl && isPlaying && isMouseIdle && !showImage
 
   // Expose pause/resume methods to parent
   useImperativeHandle(ref, () => ({
@@ -45,24 +52,31 @@ const HeroSection = forwardRef<
     }
   }), [trailerUrl, isPlaying])
 
-  // Auto-hide image overlay after a delay when trailer starts
+  // Listen for YouTube Player API messages
   useEffect(() => {
-    if (trailerUrl && iframeRef.current) {
-      setShowImage(true)
-      setTimeout(() => {
-        setShowImage(false)
-        setIsPlaying(true)
-      }, 2000)
-    }
+    if (!trailerUrl) return
 
-    // Listen for YouTube Player API messages
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://www.youtube.com') return
       
       try {
         const data = JSON.parse(event.data)
-        if (data.event === 'video-progress') {
-          // Handle video progress updates
+        // Handle YouTube player state changes
+        if (data.event === 'video-progress' || data.info) {
+          // Video ended (state 0)
+          if (data.info === 0) {
+            setVideoEnded(true)
+            setIsPlaying(false)
+          }
+          // Video playing (state 1)
+          else if (data.info === 1) {
+            setVideoEnded(false)
+            setIsPlaying(true)
+          }
+          // Video paused (state 2)
+          else if (data.info === 2) {
+            setIsPlaying(false)
+          }
         }
       } catch {
         // Ignore parsing errors
@@ -71,7 +85,7 @@ const HeroSection = forwardRef<
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [trailerUrl, isPlaying])
+  }, [trailerUrl])
 
   const handlePlay = () => {
     if (iframeRef.current && trailerUrl) {
@@ -126,7 +140,7 @@ const HeroSection = forwardRef<
         if (iframeRef.current) {
           iframeRef.current.src = currentSrc
           setIsPlaying(true)
-          setShowImage(false)
+          setVideoEnded(false)
         }
       }, 100)
     }
@@ -135,42 +149,24 @@ const HeroSection = forwardRef<
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Background Video or Image */}
-      <div className="absolute inset-0 w-full h-full">
+      <div ref={videoContainerRef} className="absolute inset-0 w-full h-full">
         {trailerUrl ? (
-          <>
-            {/* Video Background */}
-            <iframe
-              ref={iframeRef}
-              src={`${trailerUrl}&enablejsapi=1&playlist=${videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')?.key}`}
-              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              style={{
-                transform: 'scale(1.2)',
-                width: '120%',
-                height: '120%',
-                left: '-10%',
-                top: '-10%',
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen={false}
-              title={`${movie.title} Trailer`}
-            />
-            
-            {/* Image overlay for smooth loading */}
-            <div
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                showImage ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <Image
-                src={getImageUrl(movie.backdrop_path, 'original')}
-                alt={movie.title}
-                fill
-                className="object-cover"
-                priority
-                quality={100}
-              />
-            </div>
-          </>
+          /* Video Background */
+          <iframe
+            ref={iframeRef}
+            src={`${trailerUrl}&enablejsapi=1&playlist=${videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')?.key}`}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{
+              transform: 'scale(1.2)',
+              width: '120%',
+              height: '120%',
+              left: '-10%',
+              top: '-10%',
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen={false}
+            title={`${movie.title} Trailer`}
+          />
         ) : (
           /* Fallback to backdrop image if no trailer */
           <Image
@@ -190,16 +186,18 @@ const HeroSection = forwardRef<
 
       {/* Content */}
       <div 
-        className="relative z-10 flex items-center h-full" 
+        className={`relative z-10 flex items-center h-full transition-opacity duration-1000 ${
+          shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+        }`}
         style={{ 
-          paddingLeft: 'clamp(2rem, 5vw, 4rem)', 
-          paddingRight: 'clamp(1rem, 3vw, 2rem)' 
+          paddingLeft: 'clamp(2rem, 8vw, 4rem)', 
+          paddingRight: 'clamp(2rem, 5vw, 4rem)' 
         }}
       >
         <div className="w-full max-w-7xl">
           <div className="max-w-2xl">
             {/* Movie Title */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-lg pb-4">
               {movie.title}
             </h1>
 
@@ -216,7 +214,7 @@ const HeroSection = forwardRef<
             </div>
 
             {/* Movie Overview */}
-            <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl">
+            <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl pb-4">
               {movie.overview}
             </p>
 
@@ -241,45 +239,20 @@ const HeroSection = forwardRef<
 
         {/* Video Controls */}
         {trailerUrl && (
-          <div className="absolute bottom-10 right-10 flex items-center gap-5">
-            {/* Play/Pause Button */}
-            <button
-              onClick={handlePlay}
-              className="cursor-pointer flex items-center justify-center w-16 h-16 bg-black/70 backdrop-blur-md border-2 border-white/50 rounded-full text-white hover:bg-black/90 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-110"
-              title={isPlaying ? 'Pause' : 'Play'}
-              aria-label={isPlaying ? 'Pause video' : 'Play video'}
-            >
-              {isPlaying ? (
-                <Pause className="w-8 h-8" fill="white" />
-              ) : (
-                <Play className="w-8 h-8" fill="white" />
-              )}
-            </button>
-
-            {/* Mute/Unmute Button */}
-            <button
-              onClick={handleMute}
-              className="cursor-pointer flex items-center justify-center w-16 h-16 bg-black/70 backdrop-blur-md border-2 border-white/50 rounded-full text-white hover:bg-black/90 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-110"
-              title={isMuted ? 'Unmute' : 'Mute'}
-              aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-            >
-              {isMuted ? (
-                <VolumeX className="w-8 h-8" />
-              ) : (
-                <Volume2 className="w-8 h-8" />
-              )}
-            </button>
-
-            {/* Reset Button */}
-            <button
-              onClick={handleReset}
-              className="cursor-pointer flex items-center justify-center w-16 h-16 bg-black/70 backdrop-blur-md border-2 border-white/50 rounded-full text-white hover:bg-black/90 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-110"
-              title="Restart"
-              aria-label="Restart video"
-            >
-              <RotateCcw className="w-8 h-8" />
-            </button>
-          </div>
+          <VideoControls
+            iframeRef={iframeRef}
+            containerRef={videoContainerRef}
+            isPlaying={isPlaying}
+            isMuted={isMuted}
+            videoEnded={videoEnded}
+            onPlayToggle={handlePlay}
+            onMuteToggle={handleMute}
+            onRestart={handleReset}
+            size="large"
+            className={`absolute bottom-10 right-10 transition-opacity duration-1000 ${
+              shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
         )}
       </div>
     </div>

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { X, Play, Pause, Plus, ThumbsUp, ThumbsDown, Volume2, VolumeX, RotateCcw } from 'lucide-react'
 import { Movie, MovieVideo, getImageUrl, getAgeRating, getYear, getMovieDetails, getMovieVideos } from '@/lib/tmdb'
 import type { MovieDetails as TMDBMovieDetails } from '@/lib/tmdb'
+import VideoControls from './VideoControls'
 
 interface MovieDetailsProps {
   movie: Movie
@@ -17,7 +18,9 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
   const [videos, setVideos] = useState<MovieVideo[]>([])
   const [isMuted, setIsMuted] = useState(true)
   const [isPlaying, setIsPlaying] = useState(true)
+  const [videoEnded, setVideoEnded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isOpen && movie.id) {
@@ -40,17 +43,39 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
     ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1`
     : null
 
-  // YouTube Player API integration for mute control
+  // YouTube Player API integration for player state detection
   useEffect(() => {
-    if (trailer && typeof window !== 'undefined') {
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== 'https://www.youtube.com') return
-        // Handle YouTube player ready state if needed
-      }
+    if (!trailer || typeof window === 'undefined') return
 
-      window.addEventListener('message', handleMessage)
-      return () => window.removeEventListener('message', handleMessage)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://www.youtube.com') return
+      
+      try {
+        const data = JSON.parse(event.data)
+        // Handle YouTube player state changes
+        if (data.event === 'video-progress' || data.info) {
+          // Video ended (state 0)
+          if (data.info === 0) {
+            setVideoEnded(true)
+            setIsPlaying(false)
+          }
+          // Video playing (state 1)
+          else if (data.info === 1) {
+            setVideoEnded(false)
+            setIsPlaying(true)
+          }
+          // Video paused (state 2)
+          else if (data.info === 2) {
+            setIsPlaying(false)
+          }
+        }
+      } catch {
+        // Ignore parsing errors
+      }
     }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
   }, [trailer])
 
   const handlePlay = () => {
@@ -103,6 +128,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
         if (iframeRef.current) {
           iframeRef.current.src = currentSrc
           setIsPlaying(true)
+          setVideoEnded(false)
         }
       }, 100)
     }
@@ -122,7 +148,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
         </button>
 
         {/* Video/Image Section */}
-        <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
+        <div ref={videoContainerRef} className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
           {baseTrailerUrl ? (
             <>
               <iframe
@@ -135,34 +161,18 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
               />
               
               {/* Video Controls */}
-                <div className="absolute bottom-6 right-6 flex items-center gap-3 z-20">
-                {/* Play/Pause Button */}
-                <button
-                  onClick={handlePlay}
-                  className="w-14 h-14 bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110"
-                  title={isPlaying ? 'Pause' : 'Play'}
-                >
-                  {isPlaying ? <Pause className="w-7 h-7" fill="white" /> : <Play className="w-7 h-7" fill="white" />}
-                </button>
-
-                {/* Mute/Unmute Button */}
-                <button
-                  onClick={handleMute}
-                  className="w-14 h-14 bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110"
-                  title={isMuted ? 'Unmute' : 'Mute'}
-                >
-                  {isMuted ? <VolumeX className="w-7 h-7" /> : <Volume2 className="w-7 h-7" />}
-                </button>
-
-                {/* Reset Button */}
-                <button
-                  onClick={handleReset}
-                  className="w-14 h-14 bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110"
-                  title="Restart"
-                >
-                  <RotateCcw className="w-7 h-7" />
-                </button>
-              </div>
+              <VideoControls
+                iframeRef={iframeRef}
+                containerRef={videoContainerRef}
+                isPlaying={isPlaying}
+                isMuted={isMuted}
+                videoEnded={videoEnded}
+                onPlayToggle={handlePlay}
+                onMuteToggle={handleMute}
+                onRestart={handleReset}
+                size="medium"
+                className="absolute bottom-6 right-6"
+              />
             </>
           ) : (
             <Image
