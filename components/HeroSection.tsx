@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 import Image from 'next/image'
-import { Play } from 'lucide-react'
+import { Play, Plus, Check } from 'lucide-react'
 import { Movie, MovieVideo, getImageUrl, getAgeRating, getYear, getTrailerUrl } from '@/lib/tmdb'
 import { useMouseIdle } from '@/lib/hooks'
 import VideoControls from './VideoControls'
@@ -211,6 +211,7 @@ const HeroSection = forwardRef<
                 <span className="text-yellow-400 text-xl">★</span>
                 <span className="text-lg font-medium">{movie.vote_average.toFixed(1)}</span>
               </div>
+              <AddToMyListButton movie={movie} />
             </div>
 
             {/* Movie Overview */}
@@ -260,5 +261,60 @@ const HeroSection = forwardRef<
 })
 
 HeroSection.displayName = 'HeroSection'
+
+// AddToMyListButton component
+function AddToMyListButton({ movie }: { movie: Movie }) {
+  const [isInList, setIsInList] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('myList');
+      if (saved) {
+        const list = JSON.parse(saved);
+        setIsInList(list.some((m: Movie) => m.id === movie.id));
+      }
+    }
+  }, [movie.id]);
+
+  const handleToggle = () => {
+    if (typeof window === 'undefined') return;
+    setAnimating(true);
+    setTimeout(() => {
+      setAnimating(false);
+    }, 250); // Faster animation duration
+    const saved = localStorage.getItem('myList');
+    let list: Movie[] = saved ? JSON.parse(saved) : [];
+    if (isInList) {
+      list = list.filter((m: Movie) => m.id !== movie.id);
+    } else {
+      list.push(movie);
+    }
+    localStorage.setItem('myList', JSON.stringify(list));
+    setIsInList(!isInList);
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <button
+      className={`ml-4 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white transition-all duration-150 shadow-lg z-20 relative ${
+        animating ? 'animate-spin-fast' : ''
+  } ${isInList ? 'bg-white' : 'bg-black/60'}`}
+      title={isInList ? 'Remove from My List' : 'Add to My List'}
+      onClick={handleToggle}
+      style={{ outline: 'none' }}
+    >
+      {isInList ? (
+        <Check className="w-5 h-5 text-black" />
+      ) : (
+        <Plus className="w-5 h-5 text-white" />
+      )}
+    </button>
+  );
+// Add fast spin animation to global styles if not present
+}
 
 export default HeroSection

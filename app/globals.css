@@ -121,6 +121,7 @@ input:focus {
   }
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
+
+.animate-spin-fast {
+  animation: spin 0.25s linear;
 }

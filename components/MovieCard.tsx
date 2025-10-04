@@ -1,9 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Movie, getImageUrl, getAgeRating, getYear } from '@/lib/tmdb'
-import { Play } from 'lucide-react'
+import { Play, Plus, Check } from 'lucide-react'
 
 interface MovieCardProps {
   movie: Movie
@@ -48,7 +48,7 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           priority={false}
         />
-        
+
         {/* Loading placeholder */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gray-700 animate-pulse flex items-center justify-center">
@@ -91,7 +91,6 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
             <h3 className="text-white font-bold text-sm mb-2 line-clamp-1 drop-shadow-lg">
               {movie.title}
             </h3>
-            
             <div className="flex items-center gap-2 text-xs text-white/90 flex-wrap">
               <span className="bg-red-600 px-2 py-0.5 rounded text-xs font-bold shadow-sm">
                 {getAgeRating(movie.adult)}

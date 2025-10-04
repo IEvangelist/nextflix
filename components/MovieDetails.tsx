@@ -272,19 +272,19 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
             </h1>
             
             <div 
-                className="flex pb-4 items-center gap-2 md:gap-4 text-sm md:text-base text-white/8  p0 mb-4 flex-wrap"
+                className="flex pb-4 items-center gap-2 md:gap-4 text-sm md:text-base text-white mb-4 flex-wrap"
                 style={{ marginBottom: 'clamp(0.75rem, 2vw, 1rem)', gap: 'clamp(0.5rem, 1vw, 1rem)' }}
             >
               <span className="bg-red-600 px-3 md:px-4 py-1 md:py-2 rounded font-bold text-sm">
                 {getAgeRating(movie.adult)}
               </span>
-              <span>{getYear(movie.release_date)}</span>
+              <span className="text-white">{getYear(movie.release_date)}</span>
               {movieDetails?.runtime && (
-                <span>{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
+                <span className="text-white">{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
               )}
               <div className="flex items-center gap-1">
                 <span className="text-yellow-400">★</span>
-                <span>{movie.vote_average.toFixed(1)}</span>
+                <span className="text-white">{movie.vote_average.toFixed(1)}</span>
               </div>
             </div>
 
