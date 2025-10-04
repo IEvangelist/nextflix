@@ -22,6 +22,11 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
 
+  // Like/dislike/list state
+  const [inList, setInList] = useState(false)
+  const [liked, setLiked] = useState(false)
+  const [disliked, setDisliked] = useState(false)
+
   useEffect(() => {
     if (isOpen && movie.id) {
       Promise.all([
@@ -35,6 +40,31 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
       })
     }
   }, [isOpen, movie.id])
+
+  // Load preferences from localStorage on open
+  useEffect(() => {
+    if (!isOpen) return
+    const prefs = localStorage.getItem(`movie-prefs-${movie.id}`)
+    if (prefs) {
+      const { inList, liked, disliked } = JSON.parse(prefs)
+      setInList(!!inList)
+      setLiked(!!liked)
+      setDisliked(!!disliked)
+    } else {
+      setInList(false)
+      setLiked(false)
+      setDisliked(false)
+    }
+  }, [isOpen, movie.id])
+
+  // Persist preferences to localStorage
+  // useEffect(() => {
+  //   if (!isOpen) return
+  //   localStorage.setItem(
+  //     `movie-prefs-${movie.id}`,
+  //     JSON.stringify({ inList, liked, disliked })
+  //   )
+  // }, [inList, liked, disliked, isOpen, movie.id])
 
   const trailer = videos.find(video => video.type === 'Trailer' && video.site === 'YouTube')
   
@@ -134,6 +164,40 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
     }
   }
 
+  // Button handlers
+  const handleListToggle = () => {
+    setInList((prev) => {
+      const next = !prev
+      localStorage.setItem(
+        `movie-prefs-${movie.id}`,
+        JSON.stringify({ inList: next, liked, disliked })
+      )
+      return next
+    })
+  }
+  const handleLike = () => {
+    setLiked((prev) => {
+      const next = !prev
+      localStorage.setItem(
+        `movie-prefs-${movie.id}`,
+        JSON.stringify({ inList, liked: next, disliked: next ? false : disliked })
+      )
+      return next
+    })
+    setDisliked(false)
+  }
+  const handleDislike = () => {
+    setDisliked((prev) => {
+      const next = !prev
+      localStorage.setItem(
+        `movie-prefs-${movie.id}`,
+        JSON.stringify({ inList, liked: next ? false : liked, disliked: next })
+      )
+      return next
+    })
+    setLiked(false)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -142,7 +206,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 z-30 w-12 h-12 bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black border-2 border-white/30 hover:border-white/50 transition-all duration-200 shadow-lg"
+          className="cursor-pointer absolute top-6 right-6 z-30 w-12 h-12 bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black border-2 border-white/30 hover:border-white/50 transition-all duration-200 shadow-lg"
         >
           <X className="w-7 h-7" />
         </button>
@@ -161,18 +225,20 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
               />
               
               {/* Video Controls */}
-              <VideoControls
-                iframeRef={iframeRef}
-                containerRef={videoContainerRef}
-                isPlaying={isPlaying}
-                isMuted={isMuted}
-                videoEnded={videoEnded}
-                onPlayToggle={handlePlay}
-                onMuteToggle={handleMute}
-                onRestart={handleReset}
-                size="medium"
-                className="absolute bottom-6 right-6"
-              />
+              {!document.fullscreenElement && (
+                <VideoControls
+                  iframeRef={iframeRef}
+                  containerRef={videoContainerRef}
+                  isPlaying={isPlaying}
+                  isMuted={isMuted}
+                  videoEnded={videoEnded}
+                  onPlayToggle={handlePlay}
+                  onMuteToggle={handleMute}
+                  onRestart={handleReset}
+                  size="medium"
+                  className="absolute bottom-6 right-6"
+                />
+              )}
             </>
           ) : (
             <Image
@@ -206,7 +272,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
             </h1>
             
             <div 
-                className="flex items-center gap-2 md:gap-4 text-sm md:text-base text-white/80 mb-4 flex-wrap"
+                className="flex pb-4 items-center gap-2 md:gap-4 text-sm md:text-base text-white/8  p0 mb-4 flex-wrap"
                 style={{ marginBottom: 'clamp(0.75rem, 2vw, 1rem)', gap: 'clamp(0.5rem, 1vw, 1rem)' }}
             >
               <span className="bg-red-600 px-3 md:px-4 py-1 md:py-2 rounded font-bold text-sm">
@@ -227,14 +293,46 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 className="flex items-center gap-3 md:gap-4 mb-6"
                 style={{ marginBottom: 'clamp(1rem, 2vw, 1.25rem)', gap: 'clamp(0.75rem, 2vw, 1rem)' }}
             >
-              <button className="w-12 h-12 md:w-14 md:h-14 border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:border-white/60 hover:bg-white/10 transition-all duration-200">
-                <Plus className="w-6 h-6 md:w-7 md:h-7" />
+              <button
+                className={`cursor-pointer w-12 h-12 md:w-14 md:h-14 border-2 rounded-full flex items-center justify-center transition-all duration-500 ${
+                  inList
+                    ? 'bg-white text-zinc-900 border-white animate-spin-once'
+                    : 'text-white border-white/30 hover:border-white/60 hover:bg-white/10'
+                }`}
+                onClick={handleListToggle}
+                title={inList ? 'Added to My List' : 'Add to My List'}
+              >
+                {inList ? (
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <Plus className="w-6 h-6 md:w-7 md:h-7" />
+                )}
               </button>
-              <button className="w-12 h-12 md:w-14 md:h-14 border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:border-white/60 hover:bg-white/10 transition-all duration-200">
-                <ThumbsUp className="w-6 h-6 md:w-7 md:h-7" />
+              <button
+                className={`cursor-pointer w-12 h-12 md:w-14 md:h-14 border-2 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  liked
+                    ? 'bg-white text-zinc-900 border-white shadow-lg'
+                    : 'text-white border-white/30 hover:border-white/60 hover:bg-white/10'
+                }`}
+                onClick={handleLike}
+                title={liked ? 'Liked' : 'Like'}
+                disabled={disliked}
+              >
+                <ThumbsUp className={`w-6 h-6 md:w-7 md:h-7 ${liked ? 'text-zinc-900' : ''}`} />
               </button>
-              <button className="w-12 h-12 md:w-14 md:h-14 border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:border-white/60 hover:bg-white/10 transition-all duration-200">
-                <ThumbsDown className="w-6 h-6 md:w-7 md:h-7" />
+              <button
+                className={`cursor-pointer w-12 h-12 md:w-14 md:h-14 border-2 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  disliked
+                    ? 'bg-white text-zinc-900 border-white shadow-lg'
+                    : 'text-white border-white/30 hover:border-white/60 hover:bg-white/10'
+                }`}
+                onClick={handleDislike}
+                title={disliked ? 'Disliked' : 'Dislike'}
+                disabled={liked}
+              >
+                <ThumbsDown className={`w-6 h-6 md:w-7 md:h-7 ${disliked ? 'text-zinc-900' : ''}`} />
               </button>
             </div>
           </div>
@@ -281,3 +379,15 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
     </div>
   )
 }
+
+/* Add this to your CSS or global styles for the spin animation: */
+/*
+@keyframes spin-once {
+  0% { transform: rotate(0deg); }
+  70% { transform: rotate(360deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-once {
+  animation: spin-once 0.7s cubic-bezier(.68,-0.55,.27,1.55) 1;
+}
+*/

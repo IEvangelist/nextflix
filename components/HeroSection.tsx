@@ -221,13 +221,13 @@ const HeroSection = forwardRef<
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
               {/* Main Play Button */}
-              <button className="cursor-pointer flex items-center justify-center gap-4 bg-white text-black px-12 py-5 rounded-lg font-bold text-xl hover:bg-white/90 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 min-w-[180px]">
+              <button className="cursor-pointer flex items-center justify-center gap-4 bg-white/80 text-black px-12 py-5 rounded-lg font-bold text-xl hover:bg-white transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 min-w-[180px]">
                 <Play className="w-8 h-8 fill-current" />
                 Play
               </button>
 
               {/* More Info Button */}
-              <button className="cursor-pointer flex items-center justify-center gap-4 bg-gray-500/80 backdrop-blur-sm text-white px-12 py-5 rounded-lg font-bold text-xl hover:bg-gray-500 transition-all duration-200 shadow-xl hover:shadow-2xl min-w-[200px]">
+              <button className="cursor-pointer flex items-center justify-center gap-4 bg-gray-500/60 backdrop-blur-sm text-white px-12 py-5 rounded-lg font-bold text-xl hover:bg-gray-500/80 transition-all duration-200 shadow-xl hover:shadow-2xl min-w-[200px]">
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
