@@ -6,6 +6,7 @@ import { X, Plus, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Movie, MovieVideo, getImageUrl, getAgeRating, getYear, getMovieDetails, getMovieVideos } from '@/lib/tmdb'
 import type { MovieDetails as TMDBMovieDetails } from '@/lib/tmdb'
 import VideoControls from './VideoControls'
+import { useMouseIdle } from '@/lib/hooks'
 
 interface MovieDetailsProps {
   movie: Movie
@@ -21,6 +22,9 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
   const [videoEnded, setVideoEnded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
+
+  // Mouse idle detection for fading controls during video playback
+  const isMouseIdle = useMouseIdle(3000) // 3 seconds idle time
 
   // Like/dislike/list state
   const [inList, setInList] = useState(false)
@@ -44,14 +48,28 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
   // Load preferences from localStorage on open
   useEffect(() => {
     if (!isOpen) return
+    
+    // Check if movie is in My List (sync with HeroSection)
+    try {
+      const savedMovies = localStorage.getItem('myList')
+      if (savedMovies) {
+        const myList = JSON.parse(savedMovies)
+        setInList(myList.some((m: Movie) => m.id === movie.id))
+      } else {
+        setInList(false)
+      }
+    } catch (error) {
+      console.error('Error loading My List status:', error)
+      setInList(false)
+    }
+
+    // Load other preferences (liked/disliked)
     const prefs = localStorage.getItem(`movie-prefs-${movie.id}`)
     if (prefs) {
-      const { inList, liked, disliked } = JSON.parse(prefs)
-      setInList(!!inList)
+      const { liked, disliked } = JSON.parse(prefs)
       setLiked(!!liked)
       setDisliked(!!disliked)
     } else {
-      setInList(false)
       setLiked(false)
       setDisliked(false)
     }
@@ -72,6 +90,9 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
   const baseTrailerUrl = trailer 
     ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1`
     : null
+
+  // Determine if overlay content should fade when video is playing and mouse is idle
+  const shouldFadeOverlay = baseTrailerUrl && isPlaying && isMouseIdle && !videoEnded
 
   // YouTube Player API integration for player state detection
   useEffect(() => {
@@ -168,6 +189,28 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
   const handleListToggle = () => {
     setInList((prev) => {
       const next = !prev
+      
+      // Update main My List (sync with HeroSection)
+      try {
+        const savedMovies = localStorage.getItem('myList')
+        let myList: Movie[] = savedMovies ? JSON.parse(savedMovies) : []
+        
+        if (next) {
+          // Add to list if not already there
+          if (!myList.some(m => m.id === movie.id)) {
+            myList.push(movie)
+          }
+        } else {
+          // Remove from list
+          myList = myList.filter(m => m.id !== movie.id)
+        }
+        
+        localStorage.setItem('myList', JSON.stringify(myList))
+      } catch (error) {
+        console.error('Error updating My List:', error)
+      }
+
+      // Update other preferences
       localStorage.setItem(
         `movie-prefs-${movie.id}`,
         JSON.stringify({ inList: next, liked, disliked })
@@ -180,7 +223,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
       const next = !prev
       localStorage.setItem(
         `movie-prefs-${movie.id}`,
-        JSON.stringify({ inList, liked: next, disliked: next ? false : disliked })
+        JSON.stringify({ liked: next, disliked: next ? false : disliked })
       )
       return next
     })
@@ -191,7 +234,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
       const next = !prev
       localStorage.setItem(
         `movie-prefs-${movie.id}`,
-        JSON.stringify({ inList, liked: next ? false : liked, disliked: next })
+        JSON.stringify({ liked: next ? false : liked, disliked: next })
       )
       return next
     })
@@ -206,7 +249,9 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="cursor-pointer absolute top-6 right-6 z-30 w-12 h-12 bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black border-2 border-white/30 hover:border-white/50 transition-all duration-200 shadow-lg"
+          className={`cursor-pointer absolute top-6 right-6 z-30 w-12 h-12 bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black border-2 border-white/30 hover:border-white/50 transition-all duration-1000 shadow-lg ${
+            shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+          }`}
         >
           <X className="w-7 h-7" />
         </button>
@@ -248,12 +293,16 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
           )}
 
           {/* Gradient Overlay - Extended for content overlap */}
-          <div className="absolute bottom-0 left-0 right-0 h-56 md:h-64 bg-gradient-to-t from-zinc-900 via-zinc-900/90 via-zinc-900/70 to-transparent" />
+          <div className={`absolute bottom-0 left-0 right-0 h-56 md:h-64 bg-gradient-to-t from-zinc-900 via-zinc-900/90 via-zinc-900/70 to-transparent transition-opacity duration-1000 ${
+            shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+          }`} />
         </div>
 
         {/* Content Section - Overlapping the video */}
           <div 
-            className="p-4 md:p-8 relative -mt-24 md:-mt-32" 
+            className={`p-4 md:p-8 relative -mt-24 md:-mt-32 transition-opacity duration-1000 ${
+              shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+            }`} 
             style={{ 
               padding: 'clamp(1rem, 3vw, 2rem)', 
               paddingTop: '0',

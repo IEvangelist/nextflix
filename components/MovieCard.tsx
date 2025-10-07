@@ -1,9 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Movie, getImageUrl, getAgeRating, getYear } from '@/lib/tmdb'
-import { Play, Plus, Heart } from 'lucide-react'
+import { Play } from 'lucide-react'
 
 interface MovieCardProps {
   movie: Movie
@@ -14,42 +14,6 @@ interface MovieCardProps {
 export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [isInMyList, setIsInMyList] = useState(false)
-
-  // Check if movie is in My List on mount
-  useEffect(() => {
-    try {
-      const savedMovies = localStorage.getItem('myList')
-      if (savedMovies) {
-        const myList = JSON.parse(savedMovies)
-        setIsInMyList(myList.some((m: Movie) => m.id === movie.id))
-      }
-    } catch (error) {
-      console.error('Error checking My List status:', error)
-    }
-  }, [movie.id])
-
-  const toggleMyList = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent triggering the main click handler
-    
-    try {
-      const savedMovies = localStorage.getItem('myList')
-      let myList: Movie[] = savedMovies ? JSON.parse(savedMovies) : []
-      
-      if (isInMyList) {
-        // Remove from list
-        myList = myList.filter(m => m.id !== movie.id)
-      } else {
-        // Add to list
-        myList.unshift(movie) // Add to beginning
-      }
-      
-      localStorage.setItem('myList', JSON.stringify(myList))
-      setIsInMyList(!isInMyList)
-    } catch (error) {
-      console.error('Error updating My List:', error)
-    }
-  }
 
   const handleClick = () => {
     const title = movie.title || (movie as unknown as Record<string, string>).name || 'Unknown title'
@@ -100,28 +64,6 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
             isHovered ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {/* My List Button - Top Right */}
-          <div
-            className={`absolute top-3 right-3 transition-all duration-300 ease-out ${
-              isHovered ? 'scale-100 opacity-100' : 'scale-80 opacity-0'
-            }`}
-          >
-            <button
-              onClick={toggleMyList}
-              className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-lg ${
-                isInMyList
-                  ? 'bg-red-600 border-red-600 text-white hover:bg-red-700'
-                  : 'bg-black/50 border-white/70 text-white hover:bg-white/20'
-              }`}
-              title={isInMyList ? 'Remove from My List' : 'Add to My List'}
-            >
-              {isInMyList ? (
-                <Heart className="w-4 h-4 fill-current" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
-            </button>
-          </div>
 
           {/* Play Button - Centered overlay element */}
           <div className="absolute inset-0 flex items-center justify-center">

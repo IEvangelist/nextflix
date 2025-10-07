@@ -157,7 +157,7 @@ export interface VideoPlayerState {
 }
 
 // API response types
-export interface TMDBApiResponse<T = any> {
+export interface TMDBApiResponse<T = unknown> {
   page?: number
   results: T[]
   total_pages?: number
