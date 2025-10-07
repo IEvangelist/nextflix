@@ -40,15 +40,10 @@ export default function TVShowsClient({
     // Movie selection disabled for now
   }
 
-  const handleSearch = (query: string) => {
-    // TODO: Implement search functionality for TV shows
-    console.log('Searching TV shows:', query)
-  }
-
   return (
     <ErrorBoundary>
       <div className="relative">
-        <Header onSearch={handleSearch} />
+        <Header />
         
         {/* Page Title */}
         <div 

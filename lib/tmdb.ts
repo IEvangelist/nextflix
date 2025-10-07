@@ -97,6 +97,37 @@ export async function searchMovies(query: string, page: number = 1): Promise<Mov
   return response.results;
 }
 
+// Multi-search functionality for movies, TV shows, and people
+export interface SearchResult {
+  id: number
+  media_type: 'movie' | 'tv' | 'person'
+  title?: string // for movies
+  name?: string // for TV shows and people
+  overview?: string
+  poster_path?: string | null
+  backdrop_path?: string | null
+  profile_path?: string | null // for people
+  vote_average?: number
+  vote_count?: number
+  release_date?: string // for movies
+  first_air_date?: string // for TV shows
+  popularity: number
+  adult?: boolean
+  original_language?: string
+  genre_ids?: number[]
+  known_for_department?: string // for people
+  known_for?: Array<Movie | TVShow> // for people
+}
+
+export async function searchMulti(query: string, page: number = 1): Promise<SearchResult[]> {
+  if (!API_KEY) {
+    throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
+  }
+  
+  const response = await tmdb.search.multi({ query, page });
+  return response.results as SearchResult[];
+}
+
 // Utility functions
 export function getImageUrl(path: string | null, size: string = 'w500'): string {
   if (!path) return '/placeholder-movie.svg';

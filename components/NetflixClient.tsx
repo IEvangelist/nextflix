@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Movie, MovieVideo, searchMovies } from '@/lib/tmdb'
+import { Movie, MovieVideo } from '@/lib/tmdb'
 import HeroSection from './HeroSection'
 import MovieRow from './MovieRow'
 import Header from './Header'
@@ -39,32 +39,9 @@ export default function NetflixClient({
   heroMovie,
   heroVideos
 }: NetflixClientProps) {
-  const [searchResults, setSearchResults] = useState<Movie[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
   const [showMovieDetails, setShowMovieDetails] = useState(false)
   const heroRef = useRef<{ pauseVideo: () => void; resumeVideo: () => void }>(null)
-
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([])
-      setShowSearch(false)
-      return
-    }
-
-    setIsSearching(true)
-    setShowSearch(true)
-    try {
-      const results = await searchMovies(query)
-      setSearchResults(results)
-    } catch (error) {
-      console.error('Search failed:', error)
-      setSearchResults([])
-    } finally {
-      setIsSearching(false)
-    }
-  }
 
   const handleMoviePlay = (movie: Movie) => {
     console.log('Playing movie:', movie.title)
@@ -84,72 +61,29 @@ export default function NetflixClient({
     setShowMovieDetails(true)
   }
 
-  const closeMovieDetails = () => {
+  const closeModal = () => {
+    setSelectedMovie(null)
+    setShowMovieDetails(false)
     // Resume hero video when modal closes
     if (heroRef.current?.resumeVideo) {
       heroRef.current.resumeVideo()
     }
-    setShowMovieDetails(false)
-    setSelectedMovie(null)
-  }
-
-  const clearSearch = () => {
-    setSearchResults([])
-    setShowSearch(false)
   }
 
   return (
     <>
       {/* Header */}
-      <Header onSearch={handleSearch} />
-
-      {/* Search Results Overlay */}
-      {showSearch && (
-        <div className="fixed inset-0 bg-black/95 z-40 pt-20">
-          <div className="container mx-auto px-6 lg:px-8 py-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-white">
-                {isSearching ? 'Searching...' : `Search Results (${searchResults.length})`}
-              </h2>
-              <button
-                onClick={clearSearch}
-                className="text-white hover:text-gray-300 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            {isSearching ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : searchResults.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {searchResults.map((movie) => (
-                  <div key={movie.id} className="w-full">
-                    <MovieCard movie={movie} onPlay={handleMoviePlay} onClick={handleMovieClick} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20">
-                <p className="text-white/60 text-lg">No results found</p>
-                <p className="text-white/40 text-sm mt-2">Try searching with different keywords</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <Header />
 
       {/* Main Content */}
-      <div className={showSearch ? 'blur-sm pointer-events-none' : ''}>
+      <div>
         {/* Hero Section */}
-        {heroMovie && !showSearch && (
+        {heroMovie && (
           <HeroSection ref={heroRef} movie={heroMovie} videos={heroVideos} />
         )}
 
         {/* Movie Rows */}
-        {!showSearch && (
+        {(
           <div className="relative z-10 -mt-32 space-y-8 pb-16">
             {trendingMovies.length > 0 && (
               <MovieRow 
@@ -284,7 +218,7 @@ export default function NetflixClient({
         )}
         
         {/* Footer */}
-        {!showSearch && <Footer />}
+        <Footer />
       </div>
 
       {/* Movie Details Modal */}
@@ -292,7 +226,7 @@ export default function NetflixClient({
         <MovieDetails
           movie={selectedMovie}
           isOpen={showMovieDetails}
-          onClose={closeMovieDetails}
+          onClose={closeModal}
         />
       )}
     </>

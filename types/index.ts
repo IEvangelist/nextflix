@@ -1,8 +1,8 @@
 // Type definitions for the Netflix clone application
-import type { Movie, MovieVideo, MovieDetails } from '../lib/tmdb'
+import type { Movie, MovieVideo, MovieDetails, SearchResult } from '../lib/tmdb'
 
 // Re-export main types from tmdb.ts for convenience
-export type { Movie, MovieVideo, MovieDetails } from '../lib/tmdb'
+export type { Movie, MovieVideo, MovieDetails, SearchResult } from '../lib/tmdb'
 
 // Content type that can handle both movies and TV shows
 export interface MediaContent {
@@ -57,10 +57,10 @@ export interface HeaderProps {
   showMenu?: boolean
 }
 
-// Search and filter types
-export interface SearchResult {
+// Search and filter types - SearchResult is imported from tmdb.ts
+export interface SearchPageResult {
   query: string
-  results: Movie[]
+  results: SearchResult[]
   totalResults: number
   totalPages: number
   currentPage: number

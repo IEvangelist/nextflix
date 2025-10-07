@@ -43,15 +43,10 @@ export default function MoviesClient({
     setSelectedMovie(movie)
   }
 
-  const handleSearch = (query: string) => {
-    // TODO: Implement search functionality for movies
-    console.log('Searching movies:', query)
-  }
-
   return (
     <ErrorBoundary>
       <div className="relative">
-        <Header onSearch={handleSearch} />
+        <Header />
         
         {/* Page Title */}
         <div 

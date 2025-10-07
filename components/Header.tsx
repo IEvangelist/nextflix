@@ -1,17 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Bell, User } from 'lucide-react'
+import { Bell, User } from 'lucide-react'
 import Link from 'next/link'
 
-interface HeaderProps {
-  onSearch?: (query: string) => void
-}
-
-export default function Header({ onSearch }: HeaderProps) {
+export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,13 +15,6 @@ export default function Header({ onSearch }: HeaderProps) {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim() && onSearch) {
-      onSearch(searchQuery.trim())
-    }
-  }
 
   return (
     <header
@@ -56,6 +43,9 @@ export default function Header({ onSearch }: HeaderProps) {
             <Link href="/movies" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Movies
             </Link>
+            <Link href="/search" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+              Search
+            </Link>
             <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               New & Popular
             </a>
@@ -67,47 +57,6 @@ export default function Header({ onSearch }: HeaderProps) {
 
         {/* Right Side Controls */}
         <div className="flex items-center" style={{ gap: '2rem' }}>
-          {/* Search */}
-          <div className="relative">
-            {isSearchOpen ? (
-              <form onSubmit={handleSearchSubmit} className="flex items-center">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search movies..."
-                  className="bg-black/70 border border-white/40 rounded-xl px-6 py-4 text-white placeholder-gray-400 w-80 text-lg focus:outline-none focus:border-white/70 focus:ring-2 focus:ring-red-500/40 backdrop-blur-md transition-all shadow-lg"
-                  autoFocus
-                  onBlur={() => {
-                    if (!searchQuery.trim()) {
-                      setIsSearchOpen(false)
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSearchOpen(false)
-                    setSearchQuery('')
-                  }}
-                  className="cursor-pointer ml-3 text-white hover:text-gray-300 p-2 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </form>
-            ) : (
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="cursor-pointer text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg"
-                aria-label="Open search"
-              >
-                <Search className="w-6 h-6" />
-              </button>
-            )}
-          </div>
-
           {/* Notifications */}
           <button 
             className="cursor-pointer text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg relative"

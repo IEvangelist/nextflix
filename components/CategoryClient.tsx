@@ -124,11 +124,6 @@ export default function CategoryClient({ category, title }: CategoryClientProps)
     setSelectedMovie(movie)
   }
 
-  const handleSearch = (query: string) => {
-    console.log('Searching movies:', query)
-    // TODO: Implement search functionality
-  }
-
   const handleBackToHome = () => {
     router.back()
   }
@@ -136,7 +131,7 @@ export default function CategoryClient({ category, title }: CategoryClientProps)
   if (loading) {
     return (
       <div className="min-h-screen bg-black">
-        <Header onSearch={handleSearch} />
+        <Header />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -150,7 +145,7 @@ export default function CategoryClient({ category, title }: CategoryClientProps)
   return (
     <ErrorBoundary>
       <div className="relative min-h-screen bg-black">
-        <Header onSearch={handleSearch} />
+        <Header />
         
         {/* Page Header */}
         <div 
