@@ -44,11 +44,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#000000" />
-      </head>
       <body className={`${inter.variable} font-sans antialiased bg-black text-white`}>
         <ErrorBoundary>
           {children}
