@@ -23,11 +23,20 @@ export const metadata: Metadata = {
     title: "NEXTFLIX - Netflix Clone",
     description: "Stream movies and TV shows with our Netflix-inspired streaming platform",
     siteName: "NEXTFLIX",
+    images: [
+      {
+        url: "/details.png",
+        width: 1200,
+        height: 630,
+        alt: "NEXTFLIX - Stream movies and TV shows",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "NEXTFLIX - Netflix Clone",
     description: "Stream movies and TV shows with our Netflix-inspired streaming platform",
+    images: ["/details.png"],
   },
 };
 
