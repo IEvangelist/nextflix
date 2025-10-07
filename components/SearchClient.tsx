@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, X, Filter, Play, Info, Star } from 'lucide-react'
+import { Search, X, Star } from 'lucide-react'
+import Image from 'next/image'
 import { searchMulti, getImageUrl } from '../lib/tmdb'
 import { SearchResult } from '../types'
 import Header from './Header'
@@ -24,14 +25,12 @@ export default function SearchClient() {
     tv: true,
     person: true
   })
-  const [showFilters, setShowFilters] = useState(false)
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [initialContent, setInitialContent] = useState<SearchResult[]>([])
   const [initialLoading, setInitialLoading] = useState(true)
 
   // Debounced search function
-  const debouncedSearch = useCallback(
-    debounce(async (searchQuery: string) => {
+  const debouncedSearch = useCallback((searchQuery: string) => {
+    const timeoutId = setTimeout(async () => {
       if (!searchQuery.trim()) {
         setResults([])
         setFilteredResults([])
@@ -53,9 +52,10 @@ export default function SearchClient() {
       } finally {
         setLoading(false)
       }
-    }, 500),
-    [] // Remove filters from dependency to avoid recreating the debounced function
-  )
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [])
 
   // Apply filters to search results
   const applyFiltersToResults = useCallback((searchResults: SearchResult[], currentFilters: FilterState) => {
@@ -87,7 +87,8 @@ export default function SearchClient() {
 
   // Handle query change
   useEffect(() => {
-    debouncedSearch(query)
+    const cleanup = debouncedSearch(query)
+    return cleanup
   }, [query, debouncedSearch])
 
   // Handle filter changes - apply to current results
@@ -182,7 +183,7 @@ export default function SearchClient() {
     }
   }
 
-  const activeFilterCount = Object.values(filters).filter(Boolean).length
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -291,7 +292,7 @@ export default function SearchClient() {
         {/* No Results */}
         {!loading && !error && query && results.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">Your search for "{query}" did not have any matches.</p>
+            <p className="text-gray-400 text-lg">Your search for &ldquo;{query}&rdquo; did not have any matches.</p>
             <p className="text-gray-500 text-sm mt-2">Suggestions: Try different keywords</p>
           </div>
         )}
@@ -313,14 +314,12 @@ export default function SearchClient() {
                     className="group cursor-pointer"
                   >
                     <div className="relative aspect-[2/3] overflow-hidden rounded bg-gray-800 transition-all duration-200 group-hover:scale-105">
-                      <img
+                      <Image
                         src={getResultImage(result)}
                         alt={getResultTitle(result)}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement
-                          img.src = '/placeholder-movie.svg'
-                        }}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 14vw"
                       />
                       
                       {/* Media Type Badge */}
@@ -368,14 +367,12 @@ export default function SearchClient() {
                     className="group cursor-pointer"
                   >
                     <div className="relative aspect-[2/3] overflow-hidden rounded bg-gray-800 transition-all duration-200 group-hover:scale-105">
-                      <img
+                      <Image
                         src={getResultImage(result)}
                         alt={getResultTitle(result)}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement
-                          img.src = '/placeholder-movie.svg'
-                        }}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 14vw"
                       />
                       
                       {/* Media Type Badge */}
@@ -416,20 +413,3 @@ export default function SearchClient() {
   )
 }
 
-// Debounce utility function
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
-  
-  return (...args: Parameters<T>) => {
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    
-    timeout = setTimeout(() => {
-      func(...args)
-    }, wait)
-  }
-}

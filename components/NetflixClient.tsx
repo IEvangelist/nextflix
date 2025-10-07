@@ -233,5 +233,3 @@ export default function NetflixClient({
   )
 }
 
-// Import MovieCard locally to avoid circular imports
-import MovieCard from './MovieCard'
