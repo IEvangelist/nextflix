@@ -88,7 +88,7 @@ export default function VideoControls({
     large: 'w-8 h-8'
   }
 
-  const buttonClass = `${sizeClasses[size]} bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 transition-all duration-200 shadow-lg hover:scale-110 cursor-pointer`
+  const buttonClass = `${sizeClasses[size]} bg-black/80 backdrop-blur-md border-2 border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black hover:border-white/50 active:bg-black active:border-white/50 active:scale-95 transition-all duration-200 shadow-lg hover:scale-110 cursor-pointer touch-manipulation select-none`
 
   // Controls content
   const controlsContent = (
@@ -96,9 +96,19 @@ export default function VideoControls({
       {/* Play/Pause/Restart Button - Smart functionality */}
       <button
         onClick={videoEnded ? onRestart : (isPlaying ? onPlayToggle : onPlayToggle)}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (videoEnded) {
+            onRestart();
+          } else {
+            onPlayToggle();
+          }
+        }}
         className={buttonClass}
         title={videoEnded ? 'Restart Video' : (isPlaying ? 'Pause' : 'Play')}
         aria-label={videoEnded ? 'Restart video' : (isPlaying ? 'Pause video' : 'Play video')}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         {videoEnded ? (
           <RotateCcw className={`${iconSizes[size]}`} />
@@ -112,9 +122,15 @@ export default function VideoControls({
       {/* Mute/Unmute Button */}
       <button
         onClick={onMuteToggle}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onMuteToggle();
+        }}
         className={buttonClass}
         title={isMuted ? 'Unmute' : 'Mute'}
         aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         {isMuted ? (
           <VolumeX className={`${iconSizes[size]}`} />
@@ -126,9 +142,15 @@ export default function VideoControls({
       {/* Fullscreen Toggle Button */}
       <button
         onClick={handleFullscreenToggle}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleFullscreenToggle();
+        }}
         className={buttonClass}
         title={isFullscreen ? 'Exit Video Fullscreen' : 'Enter Video Fullscreen'}
         aria-label={isFullscreen ? 'Exit video fullscreen mode' : 'Enter video fullscreen mode'}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         {isFullscreen ? (
           <Minimize className={`${iconSizes[size]}`} />
