@@ -18,15 +18,57 @@ const HeroSection = forwardRef<
 >(({ movie, videos }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
-  const [showImage] = useState(true)
+  const [showImage, setShowImage] = useState(false) // Start with video, not image
   const [videoEnded, setVideoEnded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
 
   // Mouse idle detection - only when trailer is playing
   const trailerUrl = getTrailerUrl(videos)
-  const isMouseIdle = useMouseIdle(3000) // 3 seconds idle time
-  const shouldFadeOverlay = trailerUrl && isPlaying && isMouseIdle && !showImage
+  const isMouseIdle = useMouseIdle(1500) // 1.5 seconds idle time (very responsive)
+  
+  // Auto-manage showImage based on video availability and state
+  useEffect(() => {
+    if (trailerUrl && !videoEnded) {
+      setShowImage(false) // Show video
+    } else {
+      setShowImage(true)  // Show poster image
+    }
+  }, [trailerUrl, videoEnded])
+
+  // Enhanced fade condition - also check if video actually loaded
+  const [videoReady, setVideoReady] = useState(false)
+  
+  useEffect(() => {
+    if (trailerUrl) {
+      // Give video time to load before enabling fade
+      const timer = setTimeout(() => setVideoReady(true), 1000)
+      return () => clearTimeout(timer)
+    } else {
+      setVideoReady(false)
+    }
+  }, [trailerUrl])
+  
+  // Primary fade condition - more lenient for better UX
+  const shouldFadeOverlay = trailerUrl && isMouseIdle && !showImage
+  
+  // More strict condition for debugging
+  const shouldFadeOverlayStrict = trailerUrl && isPlaying && isMouseIdle && !showImage && videoReady
+
+  // Debug logging for fade conditions (remove in production)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('HeroSection fade conditions:', {
+        trailerUrl: !!trailerUrl,
+        isPlaying,
+        isMouseIdle,
+        showImage,
+        videoReady,
+        shouldFadeOverlay: shouldFadeOverlay,
+        shouldFadeOverlayStrict: shouldFadeOverlayStrict
+      })
+    }
+  }, [trailerUrl, isPlaying, isMouseIdle, showImage, videoReady, shouldFadeOverlay, shouldFadeOverlayStrict])
 
   // Expose pause/resume methods to parent
   useImperativeHandle(ref, () => ({
@@ -181,8 +223,12 @@ const HeroSection = forwardRef<
       </div>
 
       {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+      <div className={`absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent transition-opacity duration-1000 ${
+        shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+      }`} />
+      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 transition-opacity duration-1000 ${
+        shouldFadeOverlay ? 'opacity-0' : 'opacity-100'
+      }`} />
 
       {/* Content */}
       <div 

@@ -40,7 +40,7 @@ export function useMouseIdle(delay: number = 3000): boolean {
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseenter', handleMouseMove)
     document.addEventListener('mouseleave', handleMouseLeave)
-    document.addEventListener('click', resetIdleTimer)
+    // Only reset on keyboard input, not clicks (to allow video control interaction)
     document.addEventListener('keydown', resetIdleTimer)
 
     return () => {
@@ -48,7 +48,7 @@ export function useMouseIdle(delay: number = 3000): boolean {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseenter', handleMouseMove)
       document.removeEventListener('mouseleave', handleMouseLeave)
-      document.removeEventListener('click', resetIdleTimer)
+
       document.removeEventListener('keydown', resetIdleTimer)
     }
   }, [delay, resetIdleTimer])
