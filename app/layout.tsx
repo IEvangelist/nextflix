@@ -9,6 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nextflix.vercel.app'),
   title: "NEXTFLIX - Netflix Clone",
   description: "A Netflix clone built with Next.js, TypeScript, and TMDB API featuring movie browsing, search, and video playback.",
   keywords: ["netflix", "movies", "streaming", "entertainment", "nextjs", "react"],

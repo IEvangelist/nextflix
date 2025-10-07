@@ -17,7 +17,14 @@ const HeroSection = forwardRef<
   HeroSectionProps
 >(({ movie, videos }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true)
-  const [isMuted, setIsMuted] = useState(true)
+  const [isMuted, setIsMuted] = useState(() => {
+    // Load mute preference from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const savedMute = localStorage.getItem('heroVideoMuted')
+      return savedMute === 'false' ? false : true // Default to muted
+    }
+    return true
+  })
   const [showImage, setShowImage] = useState(false) // Start with video, not image
   const [videoEnded, setVideoEnded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -27,12 +34,39 @@ const HeroSection = forwardRef<
   const trailerUrl = getTrailerUrl(videos)
   const isMouseIdle = useMouseIdle(1500) // 1.5 seconds idle time (very responsive)
   
-  // Auto-manage showImage based on video availability and state
+  // Save mute preference to localStorage whenever it changes
   useEffect(() => {
-    if (trailerUrl && !videoEnded) {
-      setShowImage(false) // Show video
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('heroVideoMuted', String(isMuted))
+    }
+  }, [isMuted])
+  
+  // Apply saved mute state to iframe when it loads
+  useEffect(() => {
+    if (!trailerUrl || !iframeRef.current) return
+    
+    const timer = setTimeout(() => {
+      if (iframeRef.current) {
+        try {
+          const command = isMuted ? 'mute' : 'unMute'
+          iframeRef.current.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*')
+        } catch (error) {
+          console.log('Failed to set initial mute state:', error)
+        }
+      }
+    }, 1000) // Give iframe time to load
+    
+    return () => clearTimeout(timer)
+  }, [trailerUrl, isMuted])
+  
+  // Auto-manage showImage based on video availability and state - transition to poster when video ends
+  useEffect(() => {
+    if (videoEnded) {
+      setShowImage(true) // Show poster when video ends
+    } else if (trailerUrl) {
+      setShowImage(false) // Show video when available and not ended
     } else {
-      setShowImage(true)  // Show poster image
+      setShowImage(true) // Show poster if no trailer
     }
   }, [trailerUrl, videoEnded])
 
