@@ -77,17 +77,23 @@ export default function MovieRow({ title, movies, categorySlug, onMoviePlay, onM
           paddingRight: 'clamp(1.5rem, 4vw, 3rem)' 
         }}
       >
-        <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
-          {title}
-        </h2>
-{categorySlug && (
+        {categorySlug ? (
           <Link
             href={categorySlug === 'my-list' ? '/my-list' : `/category/${categorySlug}`}
-            className="flex items-center gap-1 text-white/70 hover:text-white transition-colors group text-sm md:text-base"
+            className="flex items-center gap-3 group cursor-pointer"
           >
-            <span>See all</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm group-hover:text-red-400 transition-colors">
+              {title}
+            </h2>
+            <div className="flex items-center gap-1 text-white/70 group-hover:text-white transition-colors text-sm md:text-base">
+              <span>See all</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
           </Link>
+        ) : (
+          <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
+            {title}
+          </h2>
         )}
       </div>
 

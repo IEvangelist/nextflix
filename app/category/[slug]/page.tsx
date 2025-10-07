@@ -1,4 +1,4 @@
-import CategoryPage from '@/components/CategoryPage'
+import CategoryClient from '@/components/CategoryClient'
 import { notFound } from 'next/navigation'
 
 interface PageProps {
@@ -9,7 +9,7 @@ interface PageProps {
 
 const categoryMap: Record<string, string> = {
   'trending': 'Trending Now',
-  'popular': 'Popular on Netflix',
+  'popular': 'Popular Movies',
   'top-rated': 'Top Rated Movies',
   'now-playing': 'Now Playing',
   'upcoming': 'Coming Soon',
@@ -29,7 +29,7 @@ export default function CategoryPageRoute({ params }: PageProps) {
     notFound()
   }
 
-  return <CategoryPage category={slug} title={title} />
+  return <CategoryClient category={slug} title={title} />
 }
 
 export function generateStaticParams() {
