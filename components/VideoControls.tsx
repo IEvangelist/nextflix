@@ -162,38 +162,49 @@ export default function VideoControls({
   )
 
   // In fullscreen mode, render as overlay with portal
+  // Only render if our container is the one in fullscreen
   if (isFullscreen && mounted && typeof window !== 'undefined') {
     const fullscreenElement = document.fullscreenElement
-    const portalRoot = fullscreenElement || document.body
+    const ourContainer = containerRef?.current || iframeRef.current
     
-    return createPortal(
-      <div 
-        className={`fixed inset-0 pointer-events-none transition-opacity duration-500 ${
-          isMouseIdle && isPlaying && !videoEnded ? 'opacity-0' : 'opacity-100'
-        }`}
-        style={{ 
-          zIndex: 2147483647, // Maximum z-index value
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          height: '100%'
-        }}
-      >
+    // Only render overlay if our container/iframe is the fullscreen element, or if it's a descendant
+    const shouldRenderOverlay = fullscreenElement && ourContainer && (
+      fullscreenElement === ourContainer || 
+      fullscreenElement.contains(ourContainer)
+    )
+    
+    if (shouldRenderOverlay) {
+      const portalRoot = fullscreenElement || document.body
+      
+      return createPortal(
         <div 
-          className="absolute bottom-10 right-10 pointer-events-auto"
+          className={`fixed inset-0 pointer-events-none transition-opacity duration-500 ${
+            isMouseIdle && isPlaying && !videoEnded ? 'opacity-0' : 'opacity-100'
+          }`}
           style={{ 
-            zIndex: 2147483647,
-            position: 'absolute'
+            zIndex: 2147483647, // Maximum z-index value
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%'
           }}
         >
-          {controlsContent}
-        </div>
-      </div>,
-      portalRoot
-    )
+          <div 
+            className="absolute bottom-10 right-10 pointer-events-auto"
+            style={{ 
+              zIndex: 2147483647,
+              position: 'absolute'
+            }}
+          >
+            {controlsContent}
+          </div>
+        </div>,
+        portalRoot
+      )
+    }
   }
 
   // Normal mode - return regular controls

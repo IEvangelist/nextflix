@@ -225,20 +225,18 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
               />
               
               {/* Video Controls */}
-              {!document.fullscreenElement && (
-                <VideoControls
-                  iframeRef={iframeRef}
-                  containerRef={videoContainerRef}
-                  isPlaying={isPlaying}
-                  isMuted={isMuted}
-                  videoEnded={videoEnded}
-                  onPlayToggle={handlePlay}
-                  onMuteToggle={handleMute}
-                  onRestart={handleReset}
-                  size="medium"
-                  className="absolute bottom-6 right-6"
-                />
-              )}
+              <VideoControls
+                iframeRef={iframeRef}
+                containerRef={videoContainerRef}
+                isPlaying={isPlaying}
+                isMuted={isMuted}
+                videoEnded={videoEnded}
+                onPlayToggle={handlePlay}
+                onMuteToggle={handleMute}
+                onRestart={handleReset}
+                size="medium"
+                className="absolute bottom-6 right-6"
+              />
             </>
           ) : (
             <Image
@@ -249,17 +247,18 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
             />
           )}
 
-          {/* Gradient Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
+          {/* Gradient Overlay - Extended for content overlap */}
+          <div className="absolute bottom-0 left-0 right-0 h-56 md:h-64 bg-gradient-to-t from-zinc-900 via-zinc-900/90 via-zinc-900/70 to-transparent" />
         </div>
 
-        {/* Content Section */}
+        {/* Content Section - Overlapping the video */}
           <div 
-            className="p-4 md:p-8" 
+            className="p-4 md:p-8 relative -mt-24 md:-mt-32" 
             style={{ 
               padding: 'clamp(1rem, 3vw, 2rem)', 
               paddingTop: '0',
-              paddingBottom: 'clamp(1rem, 2vw, 1.5rem)'
+              paddingBottom: 'clamp(1rem, 2vw, 1.5rem)',
+              marginTop: 'clamp(-6rem, -8vw, -8rem)'
             }}
           >
           {/* Title and Meta */}
