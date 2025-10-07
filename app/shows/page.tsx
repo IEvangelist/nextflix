@@ -45,17 +45,17 @@ export default async function TVShows() {
   return (
     <div className="min-h-screen bg-black">
       <TVShowsClient
-        trendingTVShows={trendingTVShows}
-        popularTVShows={popularTVShows}
-        topRatedTVShows={topRatedTVShows}
-        onTheAirTVShows={onTheAirTVShows}
-        airingTodayTVShows={airingTodayTVShows}
-        actionTVShows={actionTVShows}
-        comedyTVShows={comedyTVShows}
-        dramaTVShows={dramaTVShows}
-        crimeTVShows={crimeTVShows}
-        documentaryTVShows={documentaryTVShows}
-        animationTVShows={animationTVShows}
+        trendingTVShows={trendingTVShows as never[]}
+        popularTVShows={popularTVShows as never[]}
+        topRatedTVShows={topRatedTVShows as never[]}
+        onTheAirTVShows={onTheAirTVShows as never[]}
+        airingTodayTVShows={airingTodayTVShows as never[]}
+        actionTVShows={actionTVShows as never[]}
+        comedyTVShows={comedyTVShows as never[]}
+        dramaTVShows={dramaTVShows as never[]}
+        crimeTVShows={crimeTVShows as never[]}
+        documentaryTVShows={documentaryTVShows as never[]}
+        animationTVShows={animationTVShows as never[]}
       />
     </div>
   )

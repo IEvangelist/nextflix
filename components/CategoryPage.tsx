@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Movie, searchMovies, getPopularMovies, getTopRatedMovies, getTrendingMovies, getNowPlayingMovies, getUpcomingMovies, getActionMovies, getComedyMovies, getHorrorMovies, getRomanceMovies, getDocumentaryMovies, getAnimationMovies } from '@/lib/tmdb'
+import { useState, useEffect, useCallback } from 'react'
+import { Movie, getPopularMovies, getTopRatedMovies, getTrendingMovies, getNowPlayingMovies, getUpcomingMovies, getActionMovies, getComedyMovies, getHorrorMovies, getRomanceMovies, getDocumentaryMovies, getAnimationMovies } from '@/lib/tmdb'
 import MovieCard from '@/components/MovieCard'
 import Header from '@/components/Header'
 import Loading from '@/components/Loading'
@@ -49,7 +49,7 @@ export default function CategoryPage({ category, title }: CategoryPageProps) {
     }
   }
 
-  const loadInitialMovies = async () => {
+  const loadInitialMovies = useCallback(async () => {
     setLoading(true)
     try {
       const initialMovies = await getMoviesForCategory(category, 1)
@@ -63,38 +63,28 @@ export default function CategoryPage({ category, title }: CategoryPageProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [category])
 
-  const loadMoreMovies = async () => {
+    const loadMoreMovies = useCallback(async () => {
     if (loadingMore || !hasMore) return
 
     setLoadingMore(true)
     try {
       const nextPage = page + 1
-      const newMovies = await getMoviesForCategory(category, nextPage)
-      
-      if (newMovies.length === 0) {
-        setHasMore(false)
-      } else {
-        // Filter out duplicates based on movie ID
-        const existingIds = new Set(movies.map(movie => movie.id))
-        const uniqueNewMovies = newMovies.filter(movie => !existingIds.has(movie.id))
-        
-        setMovies(prev => [...prev, ...uniqueNewMovies])
-        setPage(nextPage)
-        setHasMore(newMovies.length === 20)
-      }
+      const moreMovies = await getMoviesForCategory(category, nextPage)
+      setMovies(prevMovies => [...prevMovies, ...moreMovies])
+      setPage(nextPage)
+      setHasMore(moreMovies.length === 20)
     } catch (error) {
       console.error('Error loading more movies:', error)
-      setHasMore(false)
     } finally {
       setLoadingMore(false)
     }
-  }
+  }, [category, loadingMore, hasMore, page])
 
   useEffect(() => {
     loadInitialMovies()
-  }, [category])
+  }, [category, loadInitialMovies])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,7 +98,7 @@ export default function CategoryPage({ category, title }: CategoryPageProps) {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [movies, page, hasMore, loadingMore])
+  }, [movies, page, hasMore, loadingMore, loadMoreMovies])
 
   if (loading) {
     return (

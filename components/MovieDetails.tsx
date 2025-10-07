@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { X, Play, Pause, Plus, ThumbsUp, ThumbsDown, Volume2, VolumeX, RotateCcw } from 'lucide-react'
+import { X, Plus, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Movie, MovieVideo, getImageUrl, getAgeRating, getYear, getMovieDetails, getMovieVideos } from '@/lib/tmdb'
 import type { MovieDetails as TMDBMovieDetails } from '@/lib/tmdb'
 import VideoControls from './VideoControls'
@@ -221,7 +221,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen={false}
-                title={`${movie.title || (movie as any).name || 'Video'} Trailer`}
+                title={`${movie.title || (movie as unknown as Record<string, string>).name || 'Video'} Trailer`}
               />
               
               {/* Video Controls */}
@@ -243,7 +243,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
           ) : (
             <Image
               src={getImageUrl(movie.backdrop_path || movie.poster_path, 'original')}
-              alt={movie.title || (movie as any).name || 'Movie poster'}
+              alt={movie.title || (movie as unknown as Record<string, string>).name || 'Movie poster'}
               fill
               className="object-cover"
             />
@@ -268,7 +268,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight"
                 style={{ marginBottom: 'clamp(0.75rem, 2vw, 1rem)' }}
             >
-              {movie.title || (movie as any).name || 'Unknown Title'}
+              {movie.title || (movie as unknown as Record<string, string>).name || 'Unknown Title'}
             </h1>
             
             <div 
@@ -278,9 +278,9 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
               <span className="bg-red-600 px-3 md:px-4 py-1 md:py-2 rounded font-bold text-sm">
                 {getAgeRating(movie.adult)}
               </span>
-              {(movie.release_date || (movie as any).first_air_date) && (
+              {(movie.release_date || (movie as unknown as Record<string, string>).first_air_date) && (
                 <span className="text-white">
-                  {getYear(movie.release_date || (movie as any).first_air_date)}
+                  {getYear(movie.release_date || (movie as unknown as Record<string, string>).first_air_date)}
                 </span>
               )}
               {movieDetails?.runtime && (
@@ -363,11 +363,11 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 </div>
               )}
               
-              {(movie.release_date || (movie as any).first_air_date) && (
+              {(movie.release_date || (movie as unknown as Record<string, string>).first_air_date) && (
                 <div>
                   <span className="text-white/60">{movie.release_date ? 'Release Date:' : 'First Air Date:'} </span>
                   <span className="text-white">
-                    {new Date(movie.release_date || (movie as any).first_air_date).toLocaleDateString()}
+                    {new Date(movie.release_date || (movie as unknown as Record<string, string>).first_air_date).toLocaleDateString()}
                   </span>
                 </div>
               )}

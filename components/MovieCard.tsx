@@ -52,7 +52,7 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
   }
 
   const handleClick = () => {
-    const title = movie.title || (movie as any).name || 'Unknown title'
+    const title = movie.title || (movie as unknown as Record<string, string>).name || 'Unknown title'
     console.log('Movie clicked:', title) // Debug log
     if (onClick) {
       onClick(movie)
@@ -60,7 +60,7 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
       onPlay(movie)
     } else {
       // Default behavior - show alert with movie details
-      const releaseDate = movie.release_date || (movie as any).first_air_date || ''
+      const releaseDate = movie.release_date || (movie as unknown as Record<string, string>).first_air_date || ''
       alert(`🎬 Playing: ${title}\n\nRating: ${movie.vote_average.toFixed(1)}/10\nRelease: ${getYear(releaseDate)}`)
     }
   }
@@ -77,7 +77,7 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
         {/* Movie Poster - Static Image */}
         <Image
           src={getImageUrl(movie.poster_path, 'w500')}
-          alt={movie.title || (movie as any).name || 'Movie poster'}
+          alt={movie.title || (movie as unknown as Record<string, string>).name || 'Movie poster'}
           fill
           className={`object-cover object-center transition-opacity duration-500 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -150,13 +150,13 @@ export default function MovieCard({ movie, onPlay, onClick }: MovieCardProps) {
             }}
           >
             <h3 className="text-white font-bold text-sm mb-2 line-clamp-1 drop-shadow-lg">
-              {movie.title || (movie as any).name || 'Unknown title'}
+              {movie.title || (movie as unknown as Record<string, string>).name || 'Unknown title'}
             </h3>
             <div className="flex items-center gap-2 text-xs text-white/90 flex-wrap">
               <span className="bg-red-600 px-2 py-0.5 rounded text-xs font-bold shadow-sm">
                 {getAgeRating(movie.adult)}
               </span>
-              <span className="font-medium">{getYear(movie.release_date || (movie as any).first_air_date || '')}</span>
+              <span className="font-medium">{getYear(movie.release_date || (movie as unknown as Record<string, string>).first_air_date || '')}</span>
               <div className="flex items-center gap-1">
                 <span className="text-yellow-400 text-xs">★</span>
                 <span className="font-medium">{movie.vote_average.toFixed(1)}</span>

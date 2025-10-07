@@ -30,7 +30,7 @@ export default function VideoControls({
   onRestart,
   className = '',
   size = 'medium',
-  showLabels = true,
+  // showLabels = true, // Currently unused, reserved for future implementation
 }: VideoControlsProps) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [mounted, setMounted] = useState(false)

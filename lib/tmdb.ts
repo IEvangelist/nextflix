@@ -157,7 +157,7 @@ export async function getAnimationMovies(page: number = 1): Promise<Movie[]> {
 }
 
 // TV Show functions 
-export async function getTrendingTVShows(timeWindow: 'day' | 'week' = 'week'): Promise<any[]> {
+export async function getTrendingTVShows(timeWindow: 'day' | 'week' = 'week') {
   if (!API_KEY) {
     throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
   }
@@ -166,7 +166,7 @@ export async function getTrendingTVShows(timeWindow: 'day' | 'week' = 'week'): P
   return response.results;
 }
 
-export async function getPopularTVShows(page: number = 1): Promise<any[]> {
+export async function getPopularTVShows(page: number = 1) {
   if (!API_KEY) {
     throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
   }
@@ -175,7 +175,7 @@ export async function getPopularTVShows(page: number = 1): Promise<any[]> {
   return response.results;
 }
 
-export async function getTopRatedTVShows(page: number = 1): Promise<any[]> {
+export async function getTopRatedTVShows(page: number = 1) {
   if (!API_KEY) {
     throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
   }
@@ -184,7 +184,7 @@ export async function getTopRatedTVShows(page: number = 1): Promise<any[]> {
   return response.results;
 }
 
-export async function getOnTheAirTVShows(page: number = 1): Promise<any[]> {
+export async function getOnTheAirTVShows(page: number = 1) {
   if (!API_KEY) {
     throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
   }
@@ -193,7 +193,7 @@ export async function getOnTheAirTVShows(page: number = 1): Promise<any[]> {
   return response.results;
 }
 
-export async function getAiringTodayTVShows(page: number = 1): Promise<any[]> {
+export async function getAiringTodayTVShows(page: number = 1) {
   if (!API_KEY) {
     throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
   }
@@ -204,32 +204,32 @@ export async function getAiringTodayTVShows(page: number = 1): Promise<any[]> {
 
 // Genre-specific TV show functions - using existing endpoints for now
 // These will return variations of popular shows until proper genre filtering is available
-export async function getActionTVShows(page: number = 1): Promise<any[]> {
+export async function getActionTVShows(page: number = 1) {
   // Return popular TV shows as placeholder for action shows
   return getPopularTVShows(page);
 }
 
-export async function getComedyTVShows(page: number = 1): Promise<any[]> {
+export async function getComedyTVShows(page: number = 1) {
   // Return top rated TV shows as placeholder for comedy shows
   return getTopRatedTVShows(page);
 }
 
-export async function getDramaTVShows(page: number = 1): Promise<any[]> {
+export async function getDramaTVShows(page: number = 1) {
   // Return on the air shows as placeholder for drama shows
   return getOnTheAirTVShows(page);
 }
 
-export async function getCrimeTVShows(page: number = 1): Promise<any[]> {
+export async function getCrimeTVShows(page: number = 1) {
   // Return airing today shows as placeholder for crime shows
   return getAiringTodayTVShows(page);
 }
 
-export async function getDocumentaryTVShows(page: number = 1): Promise<any[]> {
+export async function getDocumentaryTVShows() {
   // Return trending shows as placeholder for documentaries
   return getTrendingTVShows();
 }
 
-export async function getAnimationTVShows(page: number = 1): Promise<any[]> {
+export async function getAnimationTVShows(page: number = 1) {
   // Return popular shows as placeholder for animation
   return getPopularTVShows(page);
 }

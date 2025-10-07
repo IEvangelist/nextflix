@@ -4,6 +4,26 @@ import type { Movie, MovieVideo, MovieDetails } from '../lib/tmdb'
 // Re-export main types from tmdb.ts for convenience
 export type { Movie, MovieVideo, MovieDetails } from '../lib/tmdb'
 
+// Content type that can handle both movies and TV shows
+export interface MediaContent {
+  id: number
+  title?: string // for movies
+  name?: string // for TV shows
+  overview: string
+  poster_path: string | null
+  backdrop_path: string | null
+  vote_average: number
+  vote_count: number
+  release_date?: string // for movies
+  first_air_date?: string // for TV shows
+  genre_ids: number[]
+  adult?: boolean
+  original_language: string
+  original_title?: string // for movies
+  original_name?: string // for TV shows
+  popularity: number
+}
+
 // Additional UI-specific types
 export interface MovieCardProps {
   movie: Movie

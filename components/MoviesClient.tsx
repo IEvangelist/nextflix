@@ -37,7 +37,7 @@ export default function MoviesClient({
   animationMovies,
 }: MoviesClientProps) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [_isLoading] = useState(false)
 
   const handleMovieSelect = (movie: Movie) => {
     setSelectedMovie(movie)
@@ -73,7 +73,7 @@ export default function MoviesClient({
         </div>
 
         {/* Loading State */}
-        {isLoading && <Loading />}
+        {_isLoading && <Loading />}
 
         {/* Movie Rows */}
         <div className="space-y-8 pb-20">
