@@ -7,44 +7,45 @@ import MovieDetails from './MovieDetails'
 import Loading from './Loading'
 import Footer from './Footer'
 import { ErrorBoundary } from './ErrorBoundary'
+import { Movie } from '@/lib/tmdb'
 
-interface TVShowsClientProps {
-  trendingTVShows: any[]
-  popularTVShows: any[]
-  topRatedTVShows: any[]
-  onTheAirTVShows: any[]
-  airingTodayTVShows: any[]
-  actionTVShows: any[]
-  comedyTVShows: any[]
-  dramaTVShows: any[]
-  crimeTVShows: any[]
-  documentaryTVShows: any[]
-  animationTVShows: any[]
+interface MoviesClientProps {
+  trendingMovies: Movie[]
+  popularMovies: Movie[]
+  topRatedMovies: Movie[]
+  nowPlayingMovies: Movie[]
+  upcomingMovies: Movie[]
+  actionMovies: Movie[]
+  comedyMovies: Movie[]
+  horrorMovies: Movie[]
+  romanceMovies: Movie[]
+  documentaryMovies: Movie[]
+  animationMovies: Movie[]
 }
 
-export default function TVShowsClient({
-  trendingTVShows,
-  popularTVShows,
-  topRatedTVShows,
-  onTheAirTVShows,
-  airingTodayTVShows,
-  actionTVShows,
-  comedyTVShows,
-  dramaTVShows,
-  crimeTVShows,
-  documentaryTVShows,
-  animationTVShows,
-}: TVShowsClientProps) {
-  const [selectedMovie, setSelectedMovie] = useState<any | null>(null)
+export default function MoviesClient({
+  trendingMovies,
+  popularMovies,
+  topRatedMovies,
+  nowPlayingMovies,
+  upcomingMovies,
+  actionMovies,
+  comedyMovies,
+  horrorMovies,
+  romanceMovies,
+  documentaryMovies,
+  animationMovies,
+}: MoviesClientProps) {
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleMovieSelect = (movie: any) => {
+  const handleMovieSelect = (movie: Movie) => {
     setSelectedMovie(movie)
   }
 
   const handleSearch = (query: string) => {
-    // TODO: Implement search functionality for TV shows
-    console.log('Searching TV shows:', query)
+    // TODO: Implement search functionality for movies
+    console.log('Searching movies:', query)
   }
 
   return (
@@ -61,105 +62,105 @@ export default function TVShowsClient({
           }}
         >
           <h1 className="text-white text-4xl md:text-6xl font-bold mb-4">
-            TV Shows
+            Movies
           </h1>
           <p className="text-gray-300 text-lg md:text-xl max-w-3xl leading-relaxed">
-            <span className="text-red-400 font-semibold">Binge-worthy stories</span> await. 
-            From mind-bending thrillers to laugh-out-loud comedies, 
-            <span className="text-white font-medium"> epic dramas to animated masterpieces</span> — 
-            dive into worlds that will keep you coming back for more.
+            <span className="text-red-400 font-semibold">Cinematic adventures</span> await your discovery. 
+            From heart-pounding action to tear-jerking dramas, 
+            <span className="text-white font-medium"> side-splitting comedies to spine-chilling horrors</span> — 
+            immerse yourself in stories that define the magic of cinema.
           </p>
         </div>
 
         {/* Loading State */}
         {isLoading && <Loading />}
 
-        {/* TV Show Rows */}
+        {/* Movie Rows */}
         <div className="space-y-8 pb-20">
-          {trendingTVShows.length > 0 && (
+          {trendingMovies.length > 0 && (
             <MovieRow
               title="Trending Now"
-              movies={trendingTVShows}
+              movies={trendingMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {popularTVShows.length > 0 && (
+          {popularMovies.length > 0 && (
             <MovieRow
-              title="Popular TV Shows"
-              movies={popularTVShows}
+              title="Popular Movies"
+              movies={popularMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {topRatedTVShows.length > 0 && (
+          {nowPlayingMovies.length > 0 && (
+            <MovieRow
+              title="Now Playing"
+              movies={nowPlayingMovies}
+              onMovieClick={handleMovieSelect}
+            />
+          )}
+
+          {upcomingMovies.length > 0 && (
+            <MovieRow
+              title="Coming Soon"
+              movies={upcomingMovies}
+              onMovieClick={handleMovieSelect}
+            />
+          )}
+
+          {topRatedMovies.length > 0 && (
             <MovieRow
               title="Top Rated"
-              movies={topRatedTVShows}
+              movies={topRatedMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {onTheAirTVShows.length > 0 && (
-            <MovieRow
-              title="Currently Airing"
-              movies={onTheAirTVShows}
-              onMovieClick={handleMovieSelect}
-            />
-          )}
-
-          {airingTodayTVShows.length > 0 && (
-            <MovieRow
-              title="Airing Today"
-              movies={airingTodayTVShows}
-              onMovieClick={handleMovieSelect}
-            />
-          )}
-
-          {dramaTVShows.length > 0 && (
-            <MovieRow
-              title="Drama Series"
-              movies={dramaTVShows}
-              onMovieClick={handleMovieSelect}
-            />
-          )}
-
-          {actionTVShows.length > 0 && (
+          {actionMovies.length > 0 && (
             <MovieRow
               title="Action & Adventure"
-              movies={actionTVShows}
+              movies={actionMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {comedyTVShows.length > 0 && (
+          {comedyMovies.length > 0 && (
             <MovieRow
-              title="Comedy Shows"
-              movies={comedyTVShows}
+              title="Comedy"
+              movies={comedyMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {crimeTVShows.length > 0 && (
+          {horrorMovies.length > 0 && (
             <MovieRow
-              title="Crime & Mystery"
-              movies={crimeTVShows}
+              title="Horror & Thriller"
+              movies={horrorMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {documentaryTVShows.length > 0 && (
+          {romanceMovies.length > 0 && (
+            <MovieRow
+              title="Romance"
+              movies={romanceMovies}
+              onMovieClick={handleMovieSelect}
+            />
+          )}
+
+          {documentaryMovies.length > 0 && (
             <MovieRow
               title="Documentaries"
-              movies={documentaryTVShows}
+              movies={documentaryMovies}
               onMovieClick={handleMovieSelect}
             />
           )}
 
-          {animationTVShows.length > 0 && (
+          {animationMovies.length > 0 && (
             <MovieRow
-              title="Animated Series"
-              movies={animationTVShows}
+              title="Animation & Family"
+              movies={animationMovies}
               onMovieClick={handleMovieSelect}
             />
           )}

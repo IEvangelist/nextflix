@@ -44,19 +44,18 @@ export default function Header({ onSearch }: HeaderProps) {
       >
         {/* Logo */}
         <div className="flex items-center" style={{ gap: 'clamp(2rem, 5vw, 4rem)' }}>
-          <h1 className="text-red-600 text-3xl font-bold tracking-tight">NEXTFLIX</h1>
+          <Link href="/" className="text-red-600 text-3xl font-bold tracking-tight hover:text-red-500 transition-colors">
+            NEXTFLIX
+          </Link>
           
           {/* Navigation Menu */}
           <nav className="hidden md:flex" style={{ gap: '2rem' }}>
-            <Link href="/" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
-              Home
-            </Link>
             <Link href="/shows" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               TV Shows
             </Link>
-            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <Link href="/movies" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Movies
-            </a>
+            </Link>
             <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               New & Popular
             </a>
