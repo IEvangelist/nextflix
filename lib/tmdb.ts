@@ -115,3 +115,41 @@ export function getAgeRating(adult: boolean): string {
 export function getYear(releaseDate: string): string {
   return new Date(releaseDate).getFullYear().toString();
 }
+
+// Genre-specific functions
+export async function getMoviesByGenre(genreId: number, page: number = 1): Promise<Movie[]> {
+  if (!API_KEY) {
+    throw new Error('TMDB API key not configured. Please set NEXT_PUBLIC_TMDB_API_KEY in your environment variables.');
+  }
+  
+  const response = await tmdb.discover.movie({ 
+    with_genres: genreId.toString(), 
+    page,
+    sort_by: 'popularity.desc'
+  });
+  return response.results;
+}
+
+export async function getActionMovies(page: number = 1): Promise<Movie[]> {
+  return getMoviesByGenre(28, page); // 28 is Action genre ID
+}
+
+export async function getComedyMovies(page: number = 1): Promise<Movie[]> {
+  return getMoviesByGenre(35, page); // 35 is Comedy genre ID
+}
+
+export async function getHorrorMovies(page: number = 1): Promise<Movie[]> {
+  return getMoviesByGenre(27, page); // 27 is Horror genre ID
+}
+
+export async function getRomanceMovies(page: number = 1): Promise<Movie[]> {
+  return getMoviesByGenre(10749, page); // 10749 is Romance genre ID
+}
+
+export async function getDocumentaryMovies(page: number = 1): Promise<Movie[]> {
+  return getMoviesByGenre(99, page); // 99 is Documentary genre ID
+}
+
+export async function getAnimationMovies(page: number = 1): Promise<Movie[]> {
+  return getMoviesByGenre(16, page); // 16 is Animation genre ID
+}

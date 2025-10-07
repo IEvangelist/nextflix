@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Bell, User } from 'lucide-react'
+import Link from 'next/link'
 
 interface HeaderProps {
   onSearch?: (query: string) => void
@@ -47,9 +48,9 @@ export default function Header({ onSearch }: HeaderProps) {
           
           {/* Navigation Menu */}
           <nav className="hidden md:flex" style={{ gap: '2rem' }}>
-            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <Link href="/" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Home
-            </a>
+            </Link>
             <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               TV Shows
             </a>
@@ -59,9 +60,9 @@ export default function Header({ onSearch }: HeaderProps) {
             <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               New & Popular
             </a>
-            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <Link href="/my-list" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               My List
-            </a>
+            </Link>
           </nav>
         </div>
 

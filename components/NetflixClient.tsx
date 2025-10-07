@@ -6,6 +6,7 @@ import HeroSection from './HeroSection'
 import MovieRow from './MovieRow'
 import Header from './Header'
 import MovieDetails from './MovieDetails'
+import Footer from './Footer'
 
 interface NetflixClientProps {
   trendingMovies: Movie[]
@@ -13,6 +14,12 @@ interface NetflixClientProps {
   topRatedMovies: Movie[]
   nowPlayingMovies: Movie[]
   upcomingMovies: Movie[]
+  actionMovies: Movie[]
+  comedyMovies: Movie[]
+  horrorMovies: Movie[]
+  romanceMovies: Movie[]
+  documentaryMovies: Movie[]
+  animationMovies: Movie[]
   heroMovie: Movie | null
   heroVideos: MovieVideo[]
 }
@@ -23,6 +30,12 @@ export default function NetflixClient({
   topRatedMovies,
   nowPlayingMovies,
   upcomingMovies,
+  actionMovies,
+  comedyMovies,
+  horrorMovies,
+  romanceMovies,
+  documentaryMovies,
+  animationMovies,
   heroMovie,
   heroVideos
 }: NetflixClientProps) {
@@ -141,7 +154,8 @@ export default function NetflixClient({
             {trendingMovies.length > 0 && (
               <MovieRow 
                 title="Trending Now" 
-                movies={trendingMovies} 
+                movies={trendingMovies}
+                categorySlug="trending"
                 onMoviePlay={handleMoviePlay}
                 onMovieClick={handleMovieClick}
               />
@@ -150,7 +164,38 @@ export default function NetflixClient({
             {popularMovies.length > 0 && (
               <MovieRow 
                 title="Popular on Netflix" 
-                movies={popularMovies} 
+                movies={popularMovies}
+                categorySlug="popular"
+                onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
+              />
+            )}
+            
+            {actionMovies.length > 0 && (
+              <MovieRow 
+                title="Action Movies" 
+                movies={actionMovies}
+                categorySlug="action"
+                onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
+              />
+            )}
+            
+            {comedyMovies.length > 0 && (
+              <MovieRow 
+                title="Comedy Movies" 
+                movies={comedyMovies}
+                categorySlug="comedy"
+                onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
+              />
+            )}
+            
+            {horrorMovies.length > 0 && (
+              <MovieRow 
+                title="Horror Movies" 
+                movies={horrorMovies}
+                categorySlug="horror"
                 onMoviePlay={handleMoviePlay}
                 onMovieClick={handleMovieClick}
               />
@@ -159,7 +204,38 @@ export default function NetflixClient({
             {topRatedMovies.length > 0 && (
               <MovieRow 
                 title="Top Rated" 
-                movies={topRatedMovies} 
+                movies={topRatedMovies}
+                categorySlug="top-rated"
+                onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
+              />
+            )}
+            
+            {romanceMovies.length > 0 && (
+              <MovieRow 
+                title="Romance Movies" 
+                movies={romanceMovies}
+                categorySlug="romance"
+                onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
+              />
+            )}
+            
+            {documentaryMovies.length > 0 && (
+              <MovieRow 
+                title="Documentary Movies" 
+                movies={documentaryMovies}
+                categorySlug="documentary"
+                onMoviePlay={handleMoviePlay}
+                onMovieClick={handleMovieClick}
+              />
+            )}
+            
+            {animationMovies.length > 0 && (
+              <MovieRow 
+                title="Animation Movies" 
+                movies={animationMovies}
+                categorySlug="animation"
                 onMoviePlay={handleMoviePlay}
                 onMovieClick={handleMovieClick}
               />
@@ -168,7 +244,8 @@ export default function NetflixClient({
             {nowPlayingMovies.length > 0 && (
               <MovieRow 
                 title="Now Playing" 
-                movies={nowPlayingMovies} 
+                movies={nowPlayingMovies}
+                categorySlug="now-playing"
                 onMoviePlay={handleMoviePlay}
                 onMovieClick={handleMovieClick}
               />
@@ -177,7 +254,8 @@ export default function NetflixClient({
             {upcomingMovies.length > 0 && (
               <MovieRow 
                 title="Coming Soon" 
-                movies={upcomingMovies} 
+                movies={upcomingMovies}
+                categorySlug="upcoming"
                 onMoviePlay={handleMoviePlay}
                 onMovieClick={handleMovieClick}
               />
@@ -204,6 +282,9 @@ export default function NetflixClient({
             )}
           </div>
         )}
+        
+        {/* Footer */}
+        {!showSearch && <Footer />}
       </div>
 
       {/* Movie Details Modal */}

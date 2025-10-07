@@ -4,6 +4,12 @@ import {
   getTopRatedMovies, 
   getNowPlayingMovies,
   getUpcomingMovies,
+  getActionMovies,
+  getComedyMovies,
+  getHorrorMovies,
+  getRomanceMovies,
+  getDocumentaryMovies,
+  getAnimationMovies,
   getMovieVideos
 } from '@/lib/tmdb'
 import NetflixClient from '@/components/NetflixClient'
@@ -17,12 +23,24 @@ export default async function Home() {
     topRatedMovies,
     nowPlayingMovies,
     upcomingMovies,
+    actionMovies,
+    comedyMovies,
+    horrorMovies,
+    romanceMovies,
+    documentaryMovies,
+    animationMovies,
   ] = await Promise.all([
     getTrendingMovies(),
     getPopularMovies(),
     getTopRatedMovies(),
     getNowPlayingMovies(),
     getUpcomingMovies(),
+    getActionMovies(),
+    getComedyMovies(),
+    getHorrorMovies(),
+    getRomanceMovies(),
+    getDocumentaryMovies(),
+    getAnimationMovies(),
   ])
 
   // Get a random trending movie for the hero section
@@ -41,6 +59,12 @@ export default async function Home() {
         topRatedMovies={topRatedMovies}
         nowPlayingMovies={nowPlayingMovies}
         upcomingMovies={upcomingMovies}
+        actionMovies={actionMovies}
+        comedyMovies={comedyMovies}
+        horrorMovies={horrorMovies}
+        romanceMovies={romanceMovies}
+        documentaryMovies={documentaryMovies}
+        animationMovies={animationMovies}
         heroMovie={heroMovie}
         heroVideos={heroVideos}
       />
