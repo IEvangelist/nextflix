@@ -1,0 +1,35 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="128" height="128" rx="24" fill="#DC2626"/>
+  
+  <!-- Shadow/depth effect -->
+  <rect width="128" height="128" rx="24" fill="url(#shadow)" opacity="0.3"/>
+  
+  <defs>
+    <linearGradient id="shadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.4" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Letter N -->
+  <g id="n-letter">
+    <!-- Left vertical bar -->
+    <rect x="24" y="32" width="10" height="64" rx="2" fill="white"/>
+    
+    <!-- Diagonal bar -->
+    <path d="M 34 32 L 58 96 L 68 96 L 44 32 Z" fill="white"/>
+    
+    <!-- Right vertical bar -->
+    <rect x="58" y="32" width="10" height="64" rx="2" fill="white"/>
+  </g>
+  
+  <!-- Letter X (more prominent) -->
+  <g id="x-letter">
+    <!-- Top-left to bottom-right diagonal -->
+    <rect x="76" y="48" width="10" height="44" rx="2" fill="white" transform="rotate(45 81 70)"/>
+    
+    <!-- Top-right to bottom-left diagonal -->
+    <rect x="76" y="48" width="10" height="44" rx="2" fill="white" transform="rotate(-45 81 70)"/>
+  </g>
+</svg>

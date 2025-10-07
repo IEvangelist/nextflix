@@ -6,6 +6,7 @@ import Header from '@/components/Header'
 import MovieRow from '@/components/MovieRow'
 import MovieDetails from '@/components/MovieDetails'
 import Footer from '@/components/Footer'
+import ScrollToTop from '@/components/ScrollToTop'
 import Link from 'next/link'
 
 export default function MyListPage() {
@@ -149,6 +150,7 @@ export default function MyListPage() {
       )}
 
       <Footer />
+      <ScrollToTop />
     </div>
   )
 }

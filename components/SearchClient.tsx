@@ -7,6 +7,7 @@ import { searchMulti, getImageUrl } from '../lib/tmdb'
 import { SearchResult } from '../types'
 import Header from './Header'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 
 interface FilterState {
   movie: boolean
@@ -409,6 +410,7 @@ export default function SearchClient() {
 
       {/* Footer */}
       <Footer />
+      <ScrollToTop />
     </div>
   )
 }

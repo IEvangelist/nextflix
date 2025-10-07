@@ -7,6 +7,7 @@ import MovieRow from './MovieRow'
 import Header from './Header'
 import MovieDetails from './MovieDetails'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 
 interface NetflixClientProps {
   trendingMovies: Movie[]
@@ -219,6 +220,7 @@ export default function NetflixClient({
         
         {/* Footer */}
         <Footer />
+        <ScrollToTop />
       </div>
 
       {/* Movie Details Modal */}

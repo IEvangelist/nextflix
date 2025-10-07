@@ -5,6 +5,7 @@ import Header from './Header'
 import MovieRow from './MovieRow'
 import MovieDetails from './MovieDetails'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 import { ErrorBoundary } from './ErrorBoundary'
 
 interface TVShowsClientProps {
@@ -166,6 +167,7 @@ export default function TVShowsClient({
 
         {/* Footer */}
         <Footer />
+        <ScrollToTop />
       </div>
     </ErrorBoundary>
   )

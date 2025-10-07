@@ -1,0 +1,25 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E50914;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B20710;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="64" height="64" rx="12" fill="url(#bg)"/>
+  
+  <!-- NX Monogram -->
+  <!-- N - Left bar -->
+  <rect x="10" y="16" width="5" height="32" rx="1" fill="white"/>
+  
+  <!-- N - Diagonal -->
+  <path d="M 15 16 L 27 48 L 32 48 L 20 16 Z" fill="white"/>
+  
+  <!-- N - Right bar (also serves as part of X) -->
+  <rect x="27" y="16" width="5" height="32" rx="1" fill="white"/>
+  
+  <!-- X - Creates the cross -->
+  <path d="M 37 24 L 48 40 L 44 44 L 33 28 Z" fill="white" opacity="0.95"/>
+  <path d="M 44 24 L 33 40 L 37 44 L 48 28 Z" fill="white" opacity="0.95"/>
+</svg>

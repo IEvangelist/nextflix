@@ -24,6 +24,8 @@
     "critters": "^0.0.23",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
+    "sharp": "^0.34.4",
+    "svg2img": "^1.0.0-beta.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

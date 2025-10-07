@@ -6,6 +6,7 @@ import Header from './Header'
 import MovieRow from './MovieRow'
 import MovieDetails from './MovieDetails'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 import { ErrorBoundary } from './ErrorBoundary'
 import { ArrowLeft } from 'lucide-react'
 import { Movie, getPopularMovies, getTopRatedMovies, getTrendingMovies, getNowPlayingMovies, getUpcomingMovies, getActionMovies, getComedyMovies, getHorrorMovies, getRomanceMovies, getDocumentaryMovies, getAnimationMovies } from '@/lib/tmdb'
@@ -225,6 +226,7 @@ export default function CategoryClient({ category, title }: CategoryClientProps)
 
         {/* Footer */}
         <Footer />
+        <ScrollToTop />
       </div>
     </ErrorBoundary>
   )

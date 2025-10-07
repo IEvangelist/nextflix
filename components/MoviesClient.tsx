@@ -6,6 +6,7 @@ import MovieRow from './MovieRow'
 import MovieDetails from './MovieDetails'
 import Loading from './Loading'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Movie } from '@/lib/tmdb'
 
@@ -172,6 +173,7 @@ export default function MoviesClient({
 
         {/* Footer */}
         <Footer />
+        <ScrollToTop />
       </div>
     </ErrorBoundary>
   )
