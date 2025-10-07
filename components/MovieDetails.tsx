@@ -221,7 +221,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen={false}
-                title={`${movie.title} Trailer`}
+                title={`${movie.title || (movie as any).name || 'Video'} Trailer`}
               />
               
               {/* Video Controls */}
@@ -243,7 +243,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
           ) : (
             <Image
               src={getImageUrl(movie.backdrop_path || movie.poster_path, 'original')}
-              alt={movie.title}
+              alt={movie.title || (movie as any).name || 'Movie poster'}
               fill
               className="object-cover"
             />
@@ -268,7 +268,7 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight"
                 style={{ marginBottom: 'clamp(0.75rem, 2vw, 1rem)' }}
             >
-              {movie.title}
+              {movie.title || (movie as any).name || 'Unknown Title'}
             </h1>
             
             <div 
@@ -278,7 +278,11 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
               <span className="bg-red-600 px-3 md:px-4 py-1 md:py-2 rounded font-bold text-sm">
                 {getAgeRating(movie.adult)}
               </span>
-              <span className="text-white">{getYear(movie.release_date)}</span>
+              {(movie.release_date || (movie as any).first_air_date) && (
+                <span className="text-white">
+                  {getYear(movie.release_date || (movie as any).first_air_date)}
+                </span>
+              )}
               {movieDetails?.runtime && (
                 <span className="text-white">{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
               )}
@@ -359,10 +363,14 @@ export default function MovieDetails({ movie, isOpen, onClose }: MovieDetailsPro
                 </div>
               )}
               
-              <div>
-                <span className="text-white/60">Release Date: </span>
-                <span className="text-white">{new Date(movie.release_date).toLocaleDateString()}</span>
-              </div>
+              {(movie.release_date || (movie as any).first_air_date) && (
+                <div>
+                  <span className="text-white/60">{movie.release_date ? 'Release Date:' : 'First Air Date:'} </span>
+                  <span className="text-white">
+                    {new Date(movie.release_date || (movie as any).first_air_date).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
 
               {movieDetails?.production_companies && movieDetails.production_companies.length > 0 && (
                 <div>

@@ -51,9 +51,9 @@ export default function Header({ onSearch }: HeaderProps) {
             <Link href="/" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Home
             </Link>
-            <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
+            <Link href="/shows" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               TV Shows
-            </a>
+            </Link>
             <a href="#" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               Movies
             </a>
