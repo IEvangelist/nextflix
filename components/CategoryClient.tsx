@@ -159,7 +159,7 @@ export default function CategoryClient({ category, title }: CategoryClientProps)
           {/* Back Button */}
           <button
             onClick={handleBackToHome}
-            className="flex items-center gap-2 text-white/70 hover:text-white transition-colors mb-6 group"
+            className="flex items-center gap-2 text-white/70 hover:text-white transition-colors mb-6 group cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span>Back</span>

@@ -2,9 +2,9 @@ import CategoryClient from '@/components/CategoryClient'
 import { notFound } from 'next/navigation'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 const categoryMap: Record<string, string> = {
@@ -21,8 +21,8 @@ const categoryMap: Record<string, string> = {
   'animation': 'Animation Movies'
 }
 
-export default function CategoryPageRoute({ params }: PageProps) {
-  const { slug } = params
+export default async function CategoryPageRoute({ params }: PageProps) {
+  const { slug } = await params
   const title = categoryMap[slug]
   
   if (!title) {

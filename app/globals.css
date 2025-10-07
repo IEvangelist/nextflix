@@ -142,3 +142,46 @@ input:focus {
 .animate-spin-fast {
   animation: spin 0.25s linear;
 }
+
+/* View Transitions */
+@view-transition {
+  navigation: auto;
+}
+
+/* Customize the default cross-fade animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+/* Smooth fade transition */
+::view-transition-old(root) {
+  animation-name: fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: fade-in;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Prevent flash during transition */
+::view-transition-group(root) {
+  animation-timing-function: ease-in-out;
+}
