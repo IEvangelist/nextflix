@@ -7,19 +7,16 @@
     </linearGradient>
   </defs>
   
-  <rect width="64" height="64" rx="12" fill="url(#bg)"/>
+  <rect width="64" height="64" rx="8" fill="url(#bg)"/>
   
-  <!-- NX Monogram -->
-  <!-- N - Left bar -->
-  <rect x="10" y="16" width="5" height="32" rx="1" fill="white"/>
+  <!-- Next.js "N" (scaled larger) -->
+  <g transform="translate(8, 12) scale(0.50)">
+    <path clip-rule="evenodd" d="M80.907 79.339L17.0151 0H0V79.3059H13.6121V16.9516L63.8067 79.339H80.907Z" fill="white" fill-rule="evenodd"></path>
+  </g>
   
-  <!-- N - Diagonal -->
-  <path d="M 15 16 L 27 48 L 32 48 L 20 16 Z" fill="white"/>
-  
-  <!-- N - Right bar (also serves as part of X) -->
-  <rect x="27" y="16" width="5" height="32" rx="1" fill="white"/>
-  
-  <!-- X - Creates the cross -->
-  <path d="M 37 24 L 48 40 L 44 44 L 33 28 Z" fill="white" opacity="0.95"/>
-  <path d="M 44 24 L 33 40 L 37 44 L 48 28 Z" fill="white" opacity="0.95"/>
+  <!-- Next.js "X" (scaled smaller, positioned to the right) -->
+  <g transform="translate(-12, 20) scale(0.28)">
+    <path d="M183.32 0.0661486H165.506L229.312 79.3721H247.178L215.271 39.7464L247.127 0.126654L229.312 0.154184L206.352 28.6697L183.32 0.0661486Z" fill="white"></path>
+    <path d="M201.6 56.7148L192.679 45.6229L165.455 79.4326H183.32L201.6 56.7148Z" fill="white"></path>
+  </g>
 </svg>

@@ -21,13 +21,58 @@ export default function SearchClient() {
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [hoverCardLoading, setHoverCardLoading] = useState(false)
+  const [cardPosition, setCardPosition] = useState({ left: 0, top: 0 })
   const [filters, setFilters] = useState<FilterState>({
     movie: true,
     tv: true,
-    person: true
+    person: false
   })
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc') // desc = latest first, asc = oldest first
   const [initialContent, setInitialContent] = useState<SearchResult[]>([])
   const [initialLoading, setInitialLoading] = useState(true)
+
+  // Calculate safe position for hover card to keep it within viewport
+  const calculateCardPosition = useCallback((mouseX: number, mouseY: number, rect: DOMRect) => {
+    const cardWidth = 400
+    const cardHeight = 600 // Approximate height
+    const padding = 20 // Padding from viewport edges
+    
+    // Get the absolute position on the page
+    const absoluteX = rect.left + mouseX
+    const absoluteY = rect.top + mouseY + window.scrollY
+    
+    // Calculate the card bounds if centered on mouse
+    let cardLeft = absoluteX - cardWidth / 2
+    let cardTop = absoluteY - cardHeight / 2
+    
+    // Adjust if card would go off right edge
+    if (cardLeft + cardWidth > window.innerWidth - padding) {
+      cardLeft = window.innerWidth - cardWidth - padding
+    }
+    
+    // Adjust if card would go off left edge
+    if (cardLeft < padding) {
+      cardLeft = padding
+    }
+    
+    // Adjust if card would go off bottom edge
+    if (cardTop + cardHeight > window.innerHeight + window.scrollY - padding) {
+      cardTop = window.innerHeight + window.scrollY - cardHeight - padding
+    }
+    
+    // Adjust if card would go off top edge
+    if (cardTop < padding + window.scrollY) {
+      cardTop = padding + window.scrollY
+    }
+    
+    // Convert back to position relative to the parent element
+    const left = cardLeft - rect.left
+    const top = cardTop - rect.top - window.scrollY
+    
+    return { left, top }
+  }, [])
 
   // Debounced search function
   const debouncedSearch = useCallback((searchQuery: string) => {
@@ -59,7 +104,7 @@ export default function SearchClient() {
   }, [])
 
   // Apply filters to search results
-  const applyFiltersToResults = useCallback((searchResults: SearchResult[], currentFilters: FilterState) => {
+  const applyFiltersToResults = useCallback((searchResults: SearchResult[], currentFilters: FilterState, currentSortOrder: 'desc' | 'asc') => {
     // Debug: show what media types we have
     const mediaTypes = searchResults.reduce((acc, result) => {
       acc[result.media_type] = (acc[result.media_type] || 0) + 1
@@ -82,8 +127,31 @@ export default function SearchClient() {
       return shouldInclude
     })
     
+    // Sort by date based on sort order, then by popularity
+    const sorted = filtered.sort((a, b) => {
+      // Get release/air dates
+      const dateA = a.media_type === 'movie' ? a.release_date : a.first_air_date
+      const dateB = b.media_type === 'movie' ? b.release_date : b.first_air_date
+      
+      // If both have dates, compare them based on sort order
+      if (dateA && dateB) {
+        const timeA = new Date(dateA).getTime()
+        const timeB = new Date(dateB).getTime()
+        return currentSortOrder === 'desc' 
+          ? timeB - timeA  // newest first
+          : timeA - timeB  // oldest first
+      }
+      
+      // If only one has a date, prioritize it (or deprioritize based on sort order)
+      if (dateA) return currentSortOrder === 'desc' ? -1 : 1
+      if (dateB) return currentSortOrder === 'desc' ? 1 : -1
+      
+      // If neither has a date, sort by popularity
+      return (b.popularity || 0) - (a.popularity || 0)
+    })
+    
     console.log(`Filtered ${searchResults.length} results down to ${filtered.length}`)
-    setFilteredResults(filtered)
+    setFilteredResults(sorted)
   }, [])
 
   // Handle query change
@@ -94,13 +162,13 @@ export default function SearchClient() {
 
   // Handle filter changes - apply to current results
   useEffect(() => {
-    console.log('Filter useEffect triggered. Results length:', results.length, 'Filters:', filters)
+    console.log('Filter useEffect triggered. Results length:', results.length, 'Filters:', filters, 'Sort order:', sortOrder)
     if (results.length > 0) {
-      applyFiltersToResults(results, filters)
+      applyFiltersToResults(results, filters, sortOrder)
     } else {
       console.log('No results to filter')
     }
-  }, [filters, results, applyFiltersToResults])
+  }, [filters, sortOrder, results, applyFiltersToResults])
 
   // Load initial trending content
   useEffect(() => {
@@ -220,39 +288,97 @@ export default function SearchClient() {
               )}
             </div>
 
-            {/* Filter Pills - Inline */}
-            <div className="flex items-center gap-2 lg:gap-3">
+            {/* Filter Toggles */}
+            <div className="flex items-center gap-4 lg:gap-6 flex-wrap">
               <span className="text-gray-400 text-sm hidden lg:inline">Filter:</span>
-              <button
-                onClick={() => handleFilterChange('movie')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                  filters.movie
-                    ? 'bg-blue-600/30 text-blue-200 border border-blue-600/40'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-                }`}
-              >
-                Movies
-              </button>
-              <button
-                onClick={() => handleFilterChange('tv')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                  filters.tv
-                    ? 'bg-green-600/30 text-green-200 border border-green-600/40'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-                }`}
-              >
-                TV Shows
-              </button>
-              <button
-                onClick={() => handleFilterChange('person')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                  filters.person
-                    ? 'bg-purple-600/30 text-purple-200 border border-purple-600/40'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-                }`}
-              >
-                People
-              </button>
+              
+              {/* Movies Toggle */}
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+                  Movies
+                </span>
+                <div
+                  onClick={() => handleFilterChange('movie')}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    filters.movie ? 'bg-blue-600' : 'bg-gray-700'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      filters.movie ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </div>
+              </label>
+
+              {/* TV Shows Toggle */}
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+                  TV Shows
+                </span>
+                <div
+                  onClick={() => handleFilterChange('tv')}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    filters.tv ? 'bg-green-600' : 'bg-gray-700'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      filters.tv ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </div>
+              </label>
+
+              {/* People Toggle */}
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+                  People
+                </span>
+                <div
+                  onClick={() => handleFilterChange('person')}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    filters.person ? 'bg-purple-600' : 'bg-gray-700'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      filters.person ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </div>
+              </label>
+
+              {/* Divider */}
+              <div className="hidden lg:block w-px h-6 bg-gray-700"></div>
+
+              {/* Sort Order Label */}
+              <span className="text-gray-400 text-sm hidden lg:inline">Sort:</span>
+
+              {/* Sort Order Toggle */}
+              <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}>
+                <span className={`text-sm font-medium transition-colors ${
+                  sortOrder === 'asc' ? 'text-white' : 'text-gray-500'
+                }`}>
+                  Ascending
+                </span>
+                <div
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    sortOrder === 'desc' ? 'bg-red-600' : 'bg-orange-600'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      sortOrder === 'desc' ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </div>
+                <span className={`text-sm font-medium transition-colors ${
+                  sortOrder === 'desc' ? 'text-white' : 'text-gray-500'
+                }`}>
+                  Descending
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -309,12 +435,28 @@ export default function SearchClient() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2">
               {filteredResults.map((result) => {
                 const itemKey = `${result.media_type}-${result.id}`
+                const isHovered = hoveredItem === itemKey
                 return (
                   <div
                     key={itemKey}
-                    className="group cursor-pointer"
+                    className="group relative"
+                    style={{ cursor: hoverCardLoading && isHovered ? 'wait' : 'pointer' }}
+                    onMouseEnter={(e) => {
+                      setHoveredItem(itemKey)
+                      setHoverCardLoading(true)
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const mouseX = e.clientX - rect.left
+                      const mouseY = e.clientY - rect.top
+                      const position = calculateCardPosition(mouseX, mouseY, rect)
+                      setCardPosition(position)
+                      setTimeout(() => setHoverCardLoading(false), 300)
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredItem(null)
+                      setHoverCardLoading(false)
+                    }}
                   >
-                    <div className="relative aspect-[2/3] overflow-hidden rounded bg-gray-800 transition-all duration-200 group-hover:scale-105">
+                    <div className="relative aspect-[2/3] overflow-hidden rounded bg-gray-800">
                       <Image
                         src={getResultImage(result)}
                         alt={getResultTitle(result)}
@@ -347,6 +489,85 @@ export default function SearchClient() {
                         {getResultSubtitle(result)}
                       </p>
                     </div>
+
+                    {/* Hover Detail Card */}
+                    {isHovered && !hoverCardLoading && (
+                      <div 
+                        className="absolute z-50 bg-zinc-900/95 backdrop-blur-md rounded-lg shadow-2xl p-5 pointer-events-none border border-zinc-700"
+                        style={{
+                          width: '400px',
+                          left: `${cardPosition.left}px`,
+                          top: `${cardPosition.top}px`
+                        }}
+                      >
+                        {/* Poster/Profile Image */}
+                        <div className="relative w-full aspect-[2/3] mb-4 rounded overflow-hidden">
+                          <Image
+                            src={getResultImage(result)}
+                            alt={getResultTitle(result)}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+
+                        {/* Title */}
+                        <h4 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                          {getResultTitle(result)}
+                        </h4>
+
+                        {/* Subtitle */}
+                        <p className="text-gray-400 text-sm mb-3">
+                          {getResultSubtitle(result)}
+                        </p>
+
+                        {/* Rating and Stats */}
+                        {result.media_type !== 'person' && (
+                          <div className="flex items-center gap-3 mb-3 text-sm">
+                            {result.vote_average && result.vote_average > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-white font-medium">
+                                  {result.vote_average.toFixed(1)}
+                                </span>
+                                {result.vote_count && (
+                                  <span className="text-gray-400">
+                                    ({result.vote_count.toLocaleString()})
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {result.popularity && (
+                              <div className="bg-red-600/20 text-red-400 px-2.5 py-1 rounded text-sm">
+                                🔥 {Math.round(result.popularity)}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Language */}
+                        {result.original_language && result.media_type !== 'person' && (
+                          <div className="text-sm text-gray-400 mb-3">
+                            Language: <span className="text-gray-300">{result.original_language.toUpperCase()}</span>
+                          </div>
+                        )}
+
+                        {/* Overview or Known For */}
+                        {result.overview && (
+                          <p className="text-gray-300 text-sm line-clamp-4 leading-relaxed">
+                            {result.overview}
+                          </p>
+                        )}
+                        
+                        {result.known_for && result.known_for.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-zinc-700">
+                            <p className="text-gray-400 text-sm mb-1.5">Known for:</p>
+                            <p className="text-gray-300 text-sm line-clamp-2">
+                              {result.known_for.map(item => ('title' in item ? item.title : item.name) || '').join(', ')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -362,12 +583,28 @@ export default function SearchClient() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2">
               {initialContent.map((result) => {
                 const itemKey = `initial-${result.media_type}-${result.id}`
+                const isHovered = hoveredItem === itemKey
                 return (
                   <div
                     key={itemKey}
-                    className="group cursor-pointer"
+                    className="group relative"
+                    style={{ cursor: hoverCardLoading && isHovered ? 'wait' : 'pointer' }}
+                    onMouseEnter={(e) => {
+                      setHoveredItem(itemKey)
+                      setHoverCardLoading(true)
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const mouseX = e.clientX - rect.left
+                      const mouseY = e.clientY - rect.top
+                      const position = calculateCardPosition(mouseX, mouseY, rect)
+                      setCardPosition(position)
+                      setTimeout(() => setHoverCardLoading(false), 300)
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredItem(null)
+                      setHoverCardLoading(false)
+                    }}
                   >
-                    <div className="relative aspect-[2/3] overflow-hidden rounded bg-gray-800 transition-all duration-200 group-hover:scale-105">
+                    <div className="relative aspect-[2/3] overflow-hidden rounded bg-gray-800">
                       <Image
                         src={getResultImage(result)}
                         alt={getResultTitle(result)}
@@ -400,6 +637,85 @@ export default function SearchClient() {
                         {getResultSubtitle(result)}
                       </p>
                     </div>
+
+                    {/* Hover Detail Card */}
+                    {isHovered && !hoverCardLoading && (
+                      <div 
+                        className="absolute z-50 bg-zinc-900/95 backdrop-blur-md rounded-lg shadow-2xl p-5 pointer-events-none border border-zinc-700"
+                        style={{
+                          width: '400px',
+                          left: `${cardPosition.left}px`,
+                          top: `${cardPosition.top}px`
+                        }}
+                      >
+                        {/* Poster/Profile Image */}
+                        <div className="relative w-full aspect-[2/3] mb-4 rounded overflow-hidden">
+                          <Image
+                            src={getResultImage(result)}
+                            alt={getResultTitle(result)}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+
+                        {/* Title */}
+                        <h4 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                          {getResultTitle(result)}
+                        </h4>
+
+                        {/* Subtitle */}
+                        <p className="text-gray-400 text-sm mb-3">
+                          {getResultSubtitle(result)}
+                        </p>
+
+                        {/* Rating and Stats */}
+                        {result.media_type !== 'person' && (
+                          <div className="flex items-center gap-3 mb-3 text-sm">
+                            {result.vote_average && result.vote_average > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-white font-medium">
+                                  {result.vote_average.toFixed(1)}
+                                </span>
+                                {result.vote_count && (
+                                  <span className="text-gray-400">
+                                    ({result.vote_count.toLocaleString()})
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {result.popularity && (
+                              <div className="bg-red-600/20 text-red-400 px-2.5 py-1 rounded text-sm">
+                                🔥 {Math.round(result.popularity)}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Language */}
+                        {result.original_language && result.media_type !== 'person' && (
+                          <div className="text-sm text-gray-400 mb-3">
+                            Language: <span className="text-gray-300">{result.original_language.toUpperCase()}</span>
+                          </div>
+                        )}
+
+                        {/* Overview or Known For */}
+                        {result.overview && (
+                          <p className="text-gray-300 text-sm line-clamp-4 leading-relaxed">
+                            {result.overview}
+                          </p>
+                        )}
+                        
+                        {result.known_for && result.known_for.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-zinc-700">
+                            <p className="text-gray-400 text-sm mb-1.5">Known for:</p>
+                            <p className="text-gray-300 text-sm line-clamp-2">
+                              {result.known_for.map(item => ('title' in item ? item.title : item.name) || '').join(', ')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
