@@ -18,27 +18,55 @@ export function useMouseIdle(delay: number = 3000): boolean {
     let timeoutId: NodeJS.Timeout
 
     const handleMouseMove = () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Mouse moved - resetting idle timer')
+      }
       setIsIdle(false)
       clearTimeout(timeoutId)
       
       timeoutId = setTimeout(() => {
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Mouse idle detected')
+        }
         setIsIdle(true)
       }, delay)
     }
 
     const handleMouseLeave = () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Mouse left window - setting idle state')
+      }
+      clearTimeout(timeoutId)
+      // Set to idle when mouse leaves the window
+      setIsIdle(true)
+    }
+
+    const handleMouseEnter = () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Mouse entered window - resetting idle state')
+      }
       setIsIdle(false)
       clearTimeout(timeoutId)
+      
+      timeoutId = setTimeout(() => {
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Mouse idle detected after entering')
+        }
+        setIsIdle(true)
+      }, delay)
     }
 
     // Start the idle timer immediately
     timeoutId = setTimeout(() => {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Initial idle timer triggered')
+      }
       setIsIdle(true)
     }, delay)
 
     // Add event listeners
     document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseenter', handleMouseMove)
+    document.addEventListener('mouseenter', handleMouseEnter)
     document.addEventListener('mouseleave', handleMouseLeave)
     // Only reset on keyboard input, not clicks (to allow video control interaction)
     document.addEventListener('keydown', resetIdleTimer)
@@ -46,9 +74,8 @@ export function useMouseIdle(delay: number = 3000): boolean {
     return () => {
       clearTimeout(timeoutId)
       document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseenter', handleMouseMove)
+      document.removeEventListener('mouseenter', handleMouseEnter)
       document.removeEventListener('mouseleave', handleMouseLeave)
-
       document.removeEventListener('keydown', resetIdleTimer)
     }
   }, [delay, resetIdleTimer])

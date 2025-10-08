@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react'
 import { Bell, User } from 'lucide-react'
 import Link from 'next/link'
 
-export default function Header() {
+interface HeaderProps {
+  isMouseIdle?: boolean
+}
+
+export default function Header({ isMouseIdle = false }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
@@ -36,7 +40,7 @@ export default function Header() {
           </Link>
           
           {/* Navigation Menu */}
-          <nav className="hidden md:flex" style={{ gap: '2rem' }}>
+          <nav className={`hidden md:flex transition-opacity duration-500 ${isMouseIdle ? 'opacity-0' : 'opacity-100'}`} style={{ gap: '2rem' }}>
             <Link href="/shows" className="cursor-pointer text-white hover:text-gray-300 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-white/10">
               TV Shows
             </Link>
@@ -56,7 +60,7 @@ export default function Header() {
         </div>
 
         {/* Right Side Controls */}
-        <div className="flex items-center" style={{ gap: '2rem' }}>
+        <div className={`flex items-center transition-opacity duration-500 ${isMouseIdle ? 'opacity-0' : 'opacity-100'}`} style={{ gap: '2rem' }}>
           {/* Notifications */}
           <button 
             className="cursor-pointer text-white hover:text-gray-300 transition-colors p-3 hover:bg-white/10 rounded-lg relative"

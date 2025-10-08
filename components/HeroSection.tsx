@@ -92,7 +92,7 @@ const HeroSection = forwardRef<
   // Debug logging for fade conditions (remove in production)
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('HeroSection fade conditions:', {
+      console.debug('HeroSection fade conditions:', {
         trailerUrl: !!trailerUrl,
         isPlaying,
         isMouseIdle,

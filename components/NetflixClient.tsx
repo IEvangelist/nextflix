@@ -8,6 +8,7 @@ import Header from './Header'
 import MovieDetails from './MovieDetails'
 import Footer from './Footer'
 import ScrollToTop from './ScrollToTop'
+import { useMouseIdle } from '@/lib/hooks'
 
 interface NetflixClientProps {
   trendingMovies: Movie[]
@@ -43,6 +44,9 @@ export default function NetflixClient({
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
   const [showMovieDetails, setShowMovieDetails] = useState(false)
   const heroRef = useRef<{ pauseVideo: () => void; resumeVideo: () => void }>(null)
+  
+  // Mouse idle detection for header fade effect (same timing as hero)
+  const isMouseIdle = useMouseIdle(1500)
 
   const handleMoviePlay = (movie: Movie) => {
     console.log('Playing movie:', movie.title)
@@ -74,7 +78,7 @@ export default function NetflixClient({
   return (
     <>
       {/* Header */}
-      <Header />
+      <Header isMouseIdle={isMouseIdle} />
 
       {/* Main Content */}
       <div>
