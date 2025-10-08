@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
@@ -18,7 +20,15 @@ export default function Footer() {
         <div className="grid gap-12 md:gap-10 lg:gap-14 [--min:150px] grid-cols-[repeat(auto-fit,minmax(var(--min),1fr))] mb-14 pt-8 pb-8">
           {/* Brand + description */}
           <div className="max-w-sm">
-            <div className="text-2xl font-bold tracking-tight text-red-600 mb-4">NEXTFLIX</div>
+            <div className="mb-4">
+              <Image 
+                src="/nextflix-logo.png" 
+                alt="NEXTFLIX" 
+                width={240} 
+                height={80}
+                className="h-12 w-auto"
+              />
+            </div>
             <p className="text-sm text-gray-400 leading-relaxed pb-4 pt-2">
               A Netflix-inspired educational demo showcasing modern{' '}
               <a

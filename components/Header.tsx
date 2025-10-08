@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Bell, User } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface HeaderProps {
   isMouseIdle?: boolean
@@ -35,8 +36,18 @@ export default function Header({ isMouseIdle = false }: HeaderProps) {
       >
         {/* Logo */}
         <div className="flex items-center" style={{ gap: 'clamp(2rem, 5vw, 4rem)' }}>
-          <Link href="/" className="text-red-600 text-3xl font-bold tracking-tight hover:text-red-500 transition-colors">
-            NEXTFLIX
+          <Link 
+            href="/" 
+            className="hover:opacity-80 transition-opacity"
+          >
+            <Image 
+              src="/nextflix-logo.png" 
+              alt="NEXTFLIX" 
+              width={240} 
+              height={80}
+              className="h-14 w-auto"
+              priority
+            />
           </Link>
           
           {/* Navigation Menu */}
