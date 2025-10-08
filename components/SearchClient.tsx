@@ -433,7 +433,7 @@ export default function SearchClient() {
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2">
-              {filteredResults.map((result) => {
+              {filteredResults.map((result, index) => {
                 const itemKey = `${result.media_type}-${result.id}`
                 const isHovered = hoveredItem === itemKey
                 return (
@@ -463,6 +463,7 @@ export default function SearchClient() {
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 14vw"
+                        priority={index < 6}
                       />
                       
                       {/* Media Type Badge */}
@@ -581,7 +582,7 @@ export default function SearchClient() {
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2">
-              {initialContent.map((result) => {
+              {initialContent.map((result, index) => {
                 const itemKey = `initial-${result.media_type}-${result.id}`
                 const isHovered = hoveredItem === itemKey
                 return (
@@ -611,6 +612,7 @@ export default function SearchClient() {
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 14vw"
+                        priority={index < 6}
                       />
                       
                       {/* Media Type Badge */}
