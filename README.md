@@ -2,9 +2,21 @@
 
 A fully functional Netflix clone built with Next.js 15, TypeScript, Tailwind CSS, and The Movie Database (TMDB) API.
 
-🚀 Live Demo: [https://nextflix-ai.netlify.app](https://nextflix-ai.netlify.app)
+🚀 Live Demo: [NEXTFLIX](https://nextflix-ai.netlify.app)
 
-![Nextflix (Netflix Clone) Screenshot](assets/landing.png)
+## Screenshots
+
+The landing page highlights a trending movie in a Netflix-style hero section with title, rating, year, and description. A video trailer plays in the background with controls for play, pause, mute, and restart. Top navigation links and a dark, vibrant design create a modern streaming look.
+
+![Netflix-inspired streaming app landing page showing TRON: Ares as the featured movie. The hero section displays the TRON: Ares title, PG-13 rating, release year 2025, and a 6.7 star rating. Description reads: A highly sophisticated Program called Ares is sent from the digital world into the real world on a dangerous mission, marking humankind's first encounter with AI beings. Play and More Info buttons are visible. The background features a stylized digital cityscape with a glowing yellow light cycle moving through geometric buildings, evoking a futuristic and adventurous mood. Navigation links for TV Shows, Movies, Search, New and Popular, and My List appear at the top, with a dark theme and neon accents. The emotional tone is energetic and immersive, capturing the excitement of a sci-fi streaming experience.](assets/landing.png)
+
+The main area shows horizontally scrolling rows for categories like "Trending Now," "Popular on Netflix," and "Action Movies." Each row displays large movie and show posters with titles and interactive hover effects. The top navigation bar offers quick links to TV Shows, Movies, Search, and user profile. The layout uses a sleek black background and bold accents, closely matching the Netflix look.
+
+![Netflix-inspired streaming app interface showing the Nextflix logo and navigation links for TV Shows, Movies, Search, New and Popular, and My List at the top. The screen displays rows of large, vibrant movie and show posters under categories Trending Now, Popular on Netflix, and Action Movies. Titles visible include Play Dirty, The Conjuring, The Lost Bus, Tron Ares, Chainsaw Man, The Fantastic Four, Holy Night Demon Hunters, War of the Worlds, Primitive War, Fight Another Day, Mantis, and Django Undisputed. The background is sleek black with bold accent colors, evoking a modern, energetic, and immersive streaming experience.](assets/landing-two.png)
+
+The movie details modal closely matches Netflix’s UI, showing a large preview image, title, rating, year, runtime, and average score. Users get playback controls and social actions like add to list, like, and dislike. The modal displays a brief description, genre tags, release date, and production credits, all on a dark, blurred background for focus and immersion.
+
+![Four superheroes in blue suits with the number 4 on their chests stand in front of a futuristic blue car on a city street, with tall buildings and a large monument in the background. The movie details modal displays the title The Fantastic 4: First Steps, PG-13 rating, release year 2025, runtime 1 hour 55 minutes, and a 7.2 star rating. Description reads: Against the vibrant backdrop of a 1960s-inspired, retro-futuristic world, Marvels First Family is forced to balance their roles as heroes with the strength of their family bond, while defending Earth from a ravenous space god called Galactus and his enigmatic herald, Silver Surfer. Genres listed are Science Fiction and Adventure. Release date is 7/22/2025. Production credits are Marvel Studios and Kevin Feige Productions. The emotional tone is heroic and adventurous, evoking excitement and anticipation for a superhero film.](assets/details.png)
 
 ## Features
 
