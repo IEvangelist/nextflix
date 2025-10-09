@@ -1,35 +1,22 @@
-<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="128" height="128" rx="24" fill="#DC2626"/>
-  
-  <!-- Shadow/depth effect -->
-  <rect width="128" height="128" rx="24" fill="url(#shadow)" opacity="0.3"/>
-  
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with gradient -->
   <defs>
-    <linearGradient id="shadow" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#000000;stop-opacity:0" />
-      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.4" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E50914;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B20710;stop-opacity:1" />
     </linearGradient>
   </defs>
   
-  <!-- Letter N -->
-  <g id="n-letter">
-    <!-- Left vertical bar -->
-    <rect x="24" y="32" width="10" height="64" rx="2" fill="white"/>
-    
-    <!-- Diagonal bar -->
-    <path d="M 34 32 L 58 96 L 68 96 L 44 32 Z" fill="white"/>
-    
-    <!-- Right vertical bar -->
-    <rect x="58" y="32" width="10" height="64" rx="2" fill="white"/>
+  <rect width="64" height="64" rx="8" fill="url(#bg)"/>
+  
+  <!-- Next.js "N" (scaled larger) -->
+  <g transform="translate(8, 12) scale(0.50)">
+    <path clip-rule="evenodd" d="M80.907 79.339L17.0151 0H0V79.3059H13.6121V16.9516L63.8067 79.339H80.907Z" fill="white" fill-rule="evenodd"></path>
   </g>
   
-  <!-- Letter X (more prominent) -->
-  <g id="x-letter">
-    <!-- Top-left to bottom-right diagonal -->
-    <rect x="76" y="48" width="10" height="44" rx="2" fill="white" transform="rotate(45 81 70)"/>
-    
-    <!-- Top-right to bottom-left diagonal -->
-    <rect x="76" y="48" width="10" height="44" rx="2" fill="white" transform="rotate(-45 81 70)"/>
+  <!-- Next.js "X" (scaled smaller, positioned to the right) -->
+  <g transform="translate(-12, 20) scale(0.28)">
+    <path d="M183.32 0.0661486H165.506L229.312 79.3721H247.178L215.271 39.7464L247.127 0.126654L229.312 0.154184L206.352 28.6697L183.32 0.0661486Z" fill="white"></path>
+    <path d="M201.6 56.7148L192.679 45.6229L165.455 79.4326H183.32L201.6 56.7148Z" fill="white"></path>
   </g>
 </svg>
