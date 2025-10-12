@@ -138,7 +138,24 @@ export function getTrailerUrl(videos: MovieVideo[]): string | null {
   const trailer = videos.find(
     (video) => video.type === 'Trailer' && video.site === 'YouTube'
   );
-  return trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1` : null;
+  if (!trailer) return null;
+  
+  // Construct URL with playlist parameter for looping
+  const baseUrl = `https://www.youtube.com/embed/${trailer.key}`;
+  const params = new URLSearchParams({
+    autoplay: '1',
+    mute: '1',
+    loop: '1',
+    controls: '0',
+    showinfo: '0',
+    rel: '0',
+    iv_load_policy: '3',
+    modestbranding: '1',
+    enablejsapi: '1',
+    playlist: trailer.key // Required for loop to work
+  });
+  
+  return `${baseUrl}?${params.toString()}`;
 }
 
 export function getAgeRating(adult: boolean): string {

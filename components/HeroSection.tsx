@@ -17,18 +17,25 @@ const HeroSection = forwardRef<
   HeroSectionProps
 >(({ movie, videos }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true)
-  const [isMuted, setIsMuted] = useState(() => {
-    // Load mute preference from localStorage on mount
-    if (typeof window !== 'undefined') {
-      const savedMute = localStorage.getItem('heroVideoMuted')
-      return savedMute === 'false' ? false : true // Default to muted
-    }
-    return true
-  })
+  const [isMuted, setIsMuted] = useState(true) // Always start muted to avoid hydration issues
   const [showImage, setShowImage] = useState(false) // Start with video, not image
   const [videoEnded, setVideoEnded] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [iframeLoaded, setIframeLoaded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
+  const initialMuteAppliedRef = useRef(false)
+
+  // Load mute preference after mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+    if (typeof window !== 'undefined') {
+      const savedMute = localStorage.getItem('heroVideoMuted')
+      if (savedMute !== null) {
+        setIsMuted(savedMute === 'true')
+      }
+    }
+  }, [])
 
   // Mouse idle detection - only when trailer is playing
   const trailerUrl = getTrailerUrl(videos)
@@ -36,28 +43,61 @@ const HeroSection = forwardRef<
   
   // Save mute preference to localStorage whenever it changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && mounted) {
       localStorage.setItem('heroVideoMuted', String(isMuted))
     }
-  }, [isMuted])
+  }, [isMuted, mounted])
   
-  // Apply saved mute state to iframe when it loads
+  // Apply saved mute state to iframe when it loads - only once on initial load
   useEffect(() => {
-    if (!trailerUrl || !iframeRef.current) return
+    if (!trailerUrl || !iframeLoaded || !mounted || initialMuteAppliedRef.current) return
     
+    // Wait for YouTube IFrame API to be ready
     const timer = setTimeout(() => {
       if (iframeRef.current) {
         try {
           const command = isMuted ? 'mute' : 'unMute'
-          iframeRef.current.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*')
+          iframeRef.current.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: command, args: '' }), 
+            '*'
+          )
+          initialMuteAppliedRef.current = true
         } catch (error) {
           console.log('Failed to set initial mute state:', error)
         }
       }
-    }, 1000) // Give iframe time to load
+    }, 500) // Reduced timeout since we know iframe is loaded
     
     return () => clearTimeout(timer)
-  }, [trailerUrl, isMuted])
+  }, [trailerUrl, iframeLoaded, mounted, isMuted])
+  
+  // Handle iframe load event
+  useEffect(() => {
+    if (!trailerUrl) {
+      setIframeLoaded(false)
+      initialMuteAppliedRef.current = false
+      return
+    }
+
+    const iframe = iframeRef.current
+    if (!iframe) return
+
+    const handleLoad = () => {
+      setIframeLoaded(true)
+    }
+
+    iframe.addEventListener('load', handleLoad)
+    
+    // Also set loaded after a timeout as fallback
+    const fallbackTimer = setTimeout(() => {
+      setIframeLoaded(true)
+    }, 2000)
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad)
+      clearTimeout(fallbackTimer)
+    }
+  }, [trailerUrl])
   
   // Auto-manage showImage based on video availability and state - transition to poster when video ends
   useEffect(() => {
@@ -107,9 +147,12 @@ const HeroSection = forwardRef<
   // Expose pause/resume methods to parent
   useImperativeHandle(ref, () => ({
     pauseVideo: () => {
-      if (iframeRef.current && trailerUrl) {
+      if (iframeRef.current && trailerUrl && iframeLoaded) {
         try {
-          iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*')
+          iframeRef.current.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'pauseVideo', args: '' }), 
+            '*'
+          )
           setIsPlaying(false)
         } catch (error) {
           console.log('Failed to pause hero video:', error)
@@ -117,16 +160,19 @@ const HeroSection = forwardRef<
       }
     },
     resumeVideo: () => {
-      if (iframeRef.current && trailerUrl && !isPlaying) {
+      if (iframeRef.current && trailerUrl && !isPlaying && iframeLoaded) {
         try {
-          iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*')
+          iframeRef.current.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'playVideo', args: '' }), 
+            '*'
+          )
           setIsPlaying(true)
         } catch (error) {
           console.log('Failed to resume hero video:', error)
         }
       }
     }
-  }), [trailerUrl, isPlaying])
+  }), [trailerUrl, isPlaying, iframeLoaded])
 
   // Listen for YouTube Player API messages
   useEffect(() => {
@@ -155,7 +201,7 @@ const HeroSection = forwardRef<
           }
         }
       } catch {
-        // Ignore parsing errors
+        // Ignore parsing errors - YouTube sends various message types
       }
     }
 
@@ -164,46 +210,36 @@ const HeroSection = forwardRef<
   }, [trailerUrl])
 
   const handlePlay = () => {
-    if (iframeRef.current && trailerUrl) {
+    if (iframeRef.current && trailerUrl && iframeLoaded) {
       const iframe = iframeRef.current
       try {
         // Use postMessage API to control YouTube player
         const command = isPlaying ? 'pauseVideo' : 'playVideo'
-        iframe.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*')
+        iframe.contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func: command, args: '' }), 
+          '*'
+        )
         setIsPlaying(!isPlaying)
       } catch (error) {
-        console.log('Player control failed, using fallback:', error)
-        // Fallback: Toggle URL parameters for basic control
-        if (isPlaying) {
-          const currentSrc = iframe.src
-          iframe.src = currentSrc.replace('autoplay=1', 'autoplay=0')
-        } else {
-          const currentSrc = iframe.src
-          iframe.src = currentSrc.replace('autoplay=0', 'autoplay=1')
-        }
-        setIsPlaying(!isPlaying)
+        console.log('Player control failed:', error)
       }
     }
   }
 
   const handleMute = () => {
-    if (iframeRef.current && trailerUrl) {
+    if (iframeRef.current && trailerUrl && iframeLoaded) {
       const iframe = iframeRef.current
       try {
         // Use postMessage API to control YouTube player volume
+        // Note: Unmuting requires user interaction due to browser autoplay policies
         const command = isMuted ? 'unMute' : 'mute'
-        iframe.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, '*')
+        iframe.contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func: command, args: '' }), 
+          '*'
+        )
         setIsMuted(!isMuted)
       } catch (error) {
-        console.log('Mute control failed, using fallback:', error)
-        // Fallback: Toggle mute parameter
-        const currentSrc = iframe.src
-        if (isMuted) {
-          iframe.src = currentSrc.replace('mute=1', 'mute=0')
-        } else {
-          iframe.src = currentSrc.replace('mute=0', 'mute=1')
-        }
-        setIsMuted(!isMuted)
+        console.log('Mute control failed:', error)
       }
     }
   }
@@ -212,6 +248,8 @@ const HeroSection = forwardRef<
     if (iframeRef.current && trailerUrl) {
       const currentSrc = iframeRef.current.src
       iframeRef.current.src = ''
+      setIframeLoaded(false)
+      initialMuteAppliedRef.current = false
       setTimeout(() => {
         if (iframeRef.current) {
           iframeRef.current.src = currentSrc
@@ -230,7 +268,7 @@ const HeroSection = forwardRef<
           /* Video Background */
           <iframe
             ref={iframeRef}
-            src={`${trailerUrl}&enablejsapi=1&playlist=${videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')?.key}`}
+            src={trailerUrl}
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
             style={{
               transform: 'scale(1.2)',
@@ -240,7 +278,6 @@ const HeroSection = forwardRef<
               top: '-10%',
             }}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen={false}
             title={`${movie.title} Trailer`}
           />
         ) : (
