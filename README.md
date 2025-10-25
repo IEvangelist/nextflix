@@ -2,7 +2,7 @@
 
 A fully functional Netflix clone built with Next.js 15, TypeScript, Tailwind CSS, and The Movie Database (TMDB) API.
 
-🚀 Live Demo: [NEXTFLIX](https://nextflix-ai.netlify.app)
+[![Nextflix Demo](public/nextflix-logo.png)](https://nextflix-ai.netlify.app)
 
 ## Screenshots
 
